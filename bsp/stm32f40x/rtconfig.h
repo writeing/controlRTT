@@ -24,6 +24,7 @@
 #define RT_USING_EVENT
 #define RT_USING_MAILBOX
 #define RT_USING_MESSAGEQUEUE
+#define RT_USING_SIGNALS
 
 /* Memory Management */
 
@@ -37,7 +38,7 @@
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 128
-#define RT_CONSOLE_DEVICE_NAME "uart1"
+#define RT_CONSOLE_DEVICE_NAME "uart2"
 #define ARCH_ARM
 #define ARCH_ARM_CORTEX_M
 #define ARCH_ARM_CORTEX_M4
@@ -69,24 +70,6 @@
 
 /* Device virtual file system */
 
-#define RT_USING_DFS
-#define DFS_USING_WORKDIR
-#define DFS_FILESYSTEMS_MAX 2
-#define DFS_FILESYSTEM_TYPES_MAX 2
-#define DFS_FD_MAX 16
-#define RT_USING_DFS_ELMFAT
-
-/* elm-chan's FatFs, Generic FAT Filesystem Module */
-
-#define RT_DFS_ELM_CODE_PAGE 437
-#define RT_DFS_ELM_WORD_ACCESS
-#define RT_DFS_ELM_USE_LFN_0
-#define RT_DFS_ELM_USE_LFN 0
-#define RT_DFS_ELM_MAX_LFN 255
-#define RT_DFS_ELM_DRIVES 2
-#define RT_DFS_ELM_MAX_SECTOR_SIZE 512
-#define RT_DFS_ELM_REENTRANT
-#define RT_USING_DFS_DEVFS
 
 /* Device Drivers */
 
@@ -94,15 +77,30 @@
 #define RT_PIPE_BUFSZ 512
 #define RT_USING_SERIAL
 #define RT_USING_PIN
+#define RT_USING_PWM
+#define RT_USING_RTC
+#define RT_USING_SOFT_RTC
 
 /* Using USB */
 
+#define RT_USING_USB_DEVICE
+#define RT_USBD_THREAD_STACK_SZ 4096
+#define USB_VENDOR_ID 0x0FFE
+#define USB_PRODUCT_ID 0x0001
+#define RT_USB_DEVICE_COMPOSITE
+#define RT_USB_DEVICE_NONE
+#define RT_USB_DEVICE_HID
+#define RT_USB_DEVICE_HID_KEYBOARD
+#define RT_USB_DEVICE_HID_KEYBOARD_NUMBER 1
+#define RT_USB_DEVICE_HID_GENERAL
+#define RT_USB_DEVICE_HID_GENERAL_OUT_REPORT_LENGTH 63
+#define RT_USB_DEVICE_HID_GENERAL_IN_REPORT_LENGTH 63
+#define RT_USB_DEVICE_HID_MEDIA
 
 /* POSIX layer and C standard library */
 
 #define RT_USING_LIBC
 #define RT_USING_PTHREADS
-#define RT_USING_POSIX
 
 /* Network */
 
@@ -154,9 +152,22 @@
 
 /* tools packages */
 
+#define PKG_USING_EASYFLASH
+#define PKG_EASYFLASH_ENV
+#define PKG_EASYFLASH_ENV_USING_NORMAL
+#define PKG_EASYFLASH_ENV_SETTING_SIZE 2048
+#define PKG_EASYFLASH_ERASE_GRAN 4096
+#define PKG_EASYFLASH_START_ADDR 0
+#define PKG_EASYFLASH_DEBUG
+#define PKG_USING_EASYFLASH_V321
 
 /* system packages */
 
+#define PKG_USING_FAL
+#define FAL_DEBUG_CONFIG
+#define FAL_DEBUG 1
+#define FAL_PART_HAS_TABLE_CFG
+#define PKG_USING_FAL_LATEST_VERSION
 
 /* peripheral libraries and drivers */
 
@@ -175,5 +186,7 @@
 #define RT_USING_UART1
 #define RT_USING_UART2
 #define RT_USING_UART3
+#define RT_USING_UART4
+#define RT_USING_UART5
 
 #endif

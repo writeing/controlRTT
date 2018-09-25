@@ -10,8 +10,7 @@
       <TargetName>rt-thread_stm32f4xx</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
-      <uAC6>0</uAC6>
+      <pCCUsed>5060422::V5.06 update 4 (build 422)::ARMCC</pCCUsed>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F407VGTx</Device>
@@ -54,7 +53,7 @@
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
-          <BrowseInformation>0</BrowseInformation>
+          <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\build\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
@@ -324,7 +323,6 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>0</uC99>
-            <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>0</v6Lang>
             <v6LangP>0</v6LangP>
@@ -337,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER, STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>drivers;Libraries\CMSIS\Device\ST\STM32F4xx\Include;Libraries\CMSIS\Include;Libraries\STM32F4xx_HAL_Driver\Inc;applications;.;..\..\include;..\..\libcpu\arm\cortex-m4;..\..\libcpu\arm\common;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\finsh</IncludePath>
+              <IncludePath>applications;.;drivers;Libraries\CMSIS\Device\ST\STM32F4xx\Include;Libraries\CMSIS\Include;Libraries\STM32F4xx_HAL_Driver\Inc;packages\EasyFlash-v3.2.1\inc;..\..\include;..\..\libcpu\arm\cortex-m4;..\..\libcpu\arm\common;..\..\components\dfs\include;..\..\components\dfs\filesystems\devfs;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\finsh</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -378,6 +376,26 @@
         </TargetArmAds>
       </TargetOption>
       <Groups>
+        <Group>
+          <GroupName>Applications</GroupName>
+          <Files>
+            <File>
+              <FileName>machControl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>applications\machControl.c</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>applications\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\app.c</FilePath>
+            </File>
+          </Files>
+        </Group>
         <Group>
           <GroupName>Drivers</GroupName>
           <Files>
@@ -741,120 +759,50 @@
               <FileType>1</FileType>
               <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_wwdg.c</FilePath>
             </File>
-            <File>
-              <FileName>stm32f4xx_ll_adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_adc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_crc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_crc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_dac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_dac.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_dma.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_dma2d.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_dma2d.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_exti.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_exti.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_fmc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_fmc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_fsmc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_fsmc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_gpio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_gpio.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_i2c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_i2c.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_lptim.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_lptim.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_pwr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_pwr.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_rcc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_rcc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_rng.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_rng.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_rtc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_rtc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_sdmmc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_sdmmc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_tim.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_tim.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_usb.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_usb.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_ll_utils.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_ll_utils.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>Applications</GroupName>
+          <GroupName>EasyFlash</GroupName>
           <Files>
             <File>
-              <FileName>main.c</FileName>
+              <FileName>easyflash.c</FileName>
               <FileType>1</FileType>
-              <FilePath>applications\main.c</FilePath>
+              <FilePath>packages\EasyFlash-v3.2.1\src\easyflash.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\EasyFlash-v3.2.1\src\ef_cmd.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_env.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\EasyFlash-v3.2.1\src\ef_env.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_env_wl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\EasyFlash-v3.2.1\src\ef_env_wl.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_iap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\EasyFlash-v3.2.1\src\ef_iap.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_log.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\EasyFlash-v3.2.1\src\ef_log.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\EasyFlash-v3.2.1\src\ef_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_fal_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\packages\EasyFlash-v3.2.1\ports\ef_fal_port.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -969,6 +917,36 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>Filesystem</GroupName>
+          <Files>
+            <File>
+              <FileName>dfs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\dfs\src\dfs.c</FilePath>
+            </File>
+            <File>
+              <FileName>dfs_file.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\dfs\src\dfs_file.c</FilePath>
+            </File>
+            <File>
+              <FileName>dfs_fs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\dfs\src\dfs_fs.c</FilePath>
+            </File>
+            <File>
+              <FileName>dfs_posix.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\dfs\src\dfs_posix.c</FilePath>
+            </File>
+            <File>
+              <FileName>devfs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\dfs\filesystems\devfs\devfs.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>DeviceDrivers</GroupName>
           <Files>
             <File>
@@ -995,6 +973,11 @@
               <FileName>pipe.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\components\drivers\src\pipe.c</FilePath>
+            </File>
+            <File>
+              <FileName>ringblk_buf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\components\drivers\src\ringblk_buf.c</FilePath>
             </File>
             <File>
               <FileName>ringbuffer.c</FileName>
@@ -1051,11 +1034,5 @@
       </Groups>
     </Target>
   </Targets>
-
-  <RTE>
-    <apis/>
-    <components/>
-    <files/>
-  </RTE>
 
 </Project>

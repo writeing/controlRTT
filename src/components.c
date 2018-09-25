@@ -22,7 +22,7 @@
 
 #include <rthw.h>
 #include <rtthread.h>
-
+#include "app.h"
 #ifdef RT_USING_USER_MAIN
 #ifndef RT_MAIN_THREAD_STACK_SIZE
 #define RT_MAIN_THREAD_STACK_SIZE     2048
@@ -240,7 +240,11 @@ int rtthread_startup(void)
 
     /* create init_thread */
     rt_application_init();
-
+	
+	rt_app_application_init();
+	
+	rt_led_num_application_init();
+	
     /* timer thread initialization */
     rt_system_timer_thread_init();
 
