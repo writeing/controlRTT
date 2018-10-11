@@ -6,8 +6,15 @@
 #include <drivers/pin.h>
 void app_thread_entry(void *parameter)
 {
+	//init macn
+	//init usb stick
 	while(1)
 	{
+		//get usart data for bluetooth
+		
+		//set macn work
+		
+		//set work status to pc
 		rt_kprintf("app %s\r\n",ef_get_env("wxc"));
 		rt_thread_delay(100);		
 	}
@@ -29,19 +36,19 @@ void setNumLed(int num,int index)
 	switch(index)
 	{
 		case 1:
-			HAL_GPIO_WritePin(NUM2_GPIO_Port,NUM2_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(NUM3_GPIO_Port,NUM3_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(NUM1_GPIO_Port,NUM1_Pin,GPIO_PIN_SET);
+			rt_pin_write(39,1);
+			rt_pin_write(40,0);
+			rt_pin_write(41,0);			
 			break;
 		case 2:	
-			HAL_GPIO_WritePin(NUM3_GPIO_Port,NUM3_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(NUM1_GPIO_Port,NUM1_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(NUM2_GPIO_Port,NUM2_Pin,GPIO_PIN_SET);
+			rt_pin_write(39,0);
+			rt_pin_write(40,1);
+			rt_pin_write(41,0);						
 			break;
 		case 3:
-			HAL_GPIO_WritePin(NUM1_GPIO_Port,NUM1_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(NUM2_GPIO_Port,NUM2_Pin,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(NUM3_GPIO_Port,NUM3_Pin,GPIO_PIN_SET);
+			rt_pin_write(39,0);
+			rt_pin_write(40,0);
+			rt_pin_write(41,1);						
 			break;
 		default:return;
 	}	
@@ -57,11 +64,9 @@ void setNumLed(int num,int index)
 		}
 	}	
 }
-
-
 int getSetShowNum(int showNum)
 {
-	static int s_showNum = 0;
+	static int s_showNum = 1;
 	if(showNum == RT_NULL)
 	{
 		return s_showNum;
@@ -88,17 +93,28 @@ void initGpioForLedNum()
 	rt_device_t device;
 	//"pin"		
 	device = rt_device_find("pin");
+	
     if (device!= RT_NULL)
     {	   
+		//scan key
 		rt_pin_mode(15,PIN_MODE_INPUT);
 		rt_pin_mode(16,PIN_MODE_INPUT);
 		rt_pin_mode(17,PIN_MODE_INPUT);
 		rt_pin_mode(18,PIN_MODE_INPUT);
 		
-		
+		//numled
 		rt_pin_mode(39,PIN_MODE_OUTPUT);
 		rt_pin_mode(40,PIN_MODE_OUTPUT);
 		rt_pin_mode(41,PIN_MODE_OUTPUT);
+		
+		rt_pin_mode(97,PIN_MODE_OUTPUT);
+		rt_pin_mode(98,PIN_MODE_OUTPUT);
+		rt_pin_mode(1,PIN_MODE_OUTPUT);
+		rt_pin_mode(2,PIN_MODE_OUTPUT);
+		rt_pin_mode(3,PIN_MODE_OUTPUT);
+		rt_pin_mode(4,PIN_MODE_OUTPUT);
+		rt_pin_mode(5,PIN_MODE_OUTPUT);
+		rt_pin_mode(38,PIN_MODE_OUTPUT);
     }
 }
 	
@@ -124,7 +140,7 @@ void LED_NUM_thread_entry(void *parameter)
 	int showNum;
 	while(1)
 	{		
-		rt_pin_write(15,1);
+		//rt_pin_write(15,1);
 		result = rt_mutex_take(ledMutex, 10);
         if (result == RT_EOK)
         {
@@ -134,7 +150,7 @@ void LED_NUM_thread_entry(void *parameter)
 		//shownumIn NUMLED
 		lightNumLed(showNum);
 		rt_thread_delay(100);		
-		rt_pin_write(15,0);
+		//rt_pin_write(15,0);
 	}
 }
 

@@ -4,7 +4,16 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
-	 	 
+	 	
+#define NONE			0
+#define MACH_HEAD		0x55
+#define MACH_FUNCODE	0x03
+#define MACH_LEN		0x02
+#define MACH_DATA		0xA5
+#define MACH_CRC		0x04
+#define MACH_TITLE		0xAA
+
+	 
 typedef struct Machcontrol
 {
 	char HEAD;
@@ -16,6 +25,7 @@ typedef struct Machcontrol
 	char title;
 	char sendbuff[7];
 }stuMacnControl;		
+
 
 
 
