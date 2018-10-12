@@ -1,17 +1,32 @@
 #include "machControl.h"
 #include <rtthread.h>
 stuMacnControl g_stumach;
-
-void setFucode(char funcode)
+void _setFucode(char funcode);
+void initMacninfo(int FuncCode)
 {
-	g_stumach.FuncCode = funcode;
+	_setFucode(FuncCode);
+	g_stumach.sendbuff[0] = g_stumach.HEAD;
+	g_stumach.sendbuff[1] = g_stumach.FuncCode;
+	g_stumach.sendbuff[2] = g_stumach.dataLen;
+	g_stumach.sendbuff[6] = g_stumach.title;
+	setSendData(0,0);	
+	g_stumach.FLag = MACN_BEGIN;
+}
+void _setFucode(char funcode)
+{
+	g_stumach.FuncCode = funcode;	
 }
 void setSendData(char data1,char data2)
 {
 	g_stumach.sbuff[0] = data1;
 	g_stumach.sbuff[1] = data2;
+
 }
-void getCrcData()
+int getMacnRunStatus()
+{
+	return g_stumach.FLag;
+}
+void _getCrcData()
 {
 	unsigned char crc = 0;
 	crc+=g_stumach.FuncCode;
@@ -22,18 +37,15 @@ void getCrcData()
 }
 char *getSendData()
 {
-	g_stumach.sendbuff[0] = g_stumach.HEAD;
-	g_stumach.sendbuff[1] = g_stumach.FuncCode;
-	g_stumach.sendbuff[2] = g_stumach.dataLen;
+	_getCrcData();
 	g_stumach.sendbuff[3] = g_stumach.sbuff[0];
 	g_stumach.sendbuff[4] = g_stumach.sbuff[1];
 	g_stumach.sendbuff[5] = g_stumach.crc;
-	g_stumach.sendbuff[6] = g_stumach.title;
 	return g_stumach.sendbuff;
 }
 void ansyMacnStatus(char sta)
 {
-	
+	//g_stumach.FLag = MACN_BEGIN;
 	//if(sta == )
 }
 void checkMacnData(char ch)
@@ -93,6 +105,27 @@ void checkMacnData(char ch)
 			break;
 	}
 }
-
+void setMacbWorkStatus(uint8_t status)
+{
+	uint8_t macndire = status >> 4;
+	uint8_t macnSpeed = status & 0x0F;
+	switch(macndire)
+	{
+		case MACN_FORWARD:
+			setSendData(macndire,macnSpeed);
+			break;
+		case MACN_BACKUP:
+			setSendData(macndire,macnSpeed);
+			break;
+		case MACN_LEFT:
+			setSendData(0,0);
+			//setSendData(macndire,macnSpeed);
+			break;
+		case MACN_RIGHT:
+			setSendData(0,0);
+			//setSendData(macndire,macnSpeed);
+			break;		
+	}	
+}
 
 

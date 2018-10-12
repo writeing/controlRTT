@@ -394,6 +394,11 @@
               <FileType>1</FileType>
               <FilePath>.\applications\app.c</FilePath>
             </File>
+            <File>
+              <FileName>bluetooth.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\bluetooth.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

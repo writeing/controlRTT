@@ -4,27 +4,116 @@
 #include "app.h"
 #include "finsh.h"
 #include <drivers/pin.h>
-void app_thread_entry(void *parameter)
+#include "machControl.h"
+#include "bluetooth.h"
+rt_mq_t rx_mq;
+char uart_rx_buffer[64];		
+struct rx_msg
 {
-	//init macn
+	rt_device_t dev;
+	rt_size_t size;
+};	
+
+rt_err_t uart_input(rt_device_t dev, rt_size_t size);
+void app_thread_entry(void *parameter)
+{	
 	//init usb stick
+	
+	//init usart blueTooth
+	struct rx_msg msg;
+	rt_device_t device, write_device;
+	rt_err_t result = RT_EOK;
+    device= rt_device_find("uart2");
+    if (device != RT_NULL)
+    {
+        rt_device_set_rx_indicate(device, uart_input);
+        rt_device_open(device, RT_DEVICE_OFLAG_RDWR);
+    }
+	write_device = device;
+	initBlueSet();
 	while(1)
 	{
 		//get usart data for bluetooth
-		
+		result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg),50);
+        if (result == -RT_ETIMEOUT)
+        {
+            //rt_kprintf("timeout count:%d\n", ++count);
+        }
+		if (result == RT_EOK)
+        {
+            rt_uint32_t rx_length;
+			rt_tick_t starttime = rt_tick_get();
+            while(rx_length != msg.size || rt_tick_get() - starttime < 3*1000)
+			{				
+				rt_device_read(msg.dev, rx_length, &(uart_rx_buffer[0]),1);
+				rx_length ++;
+				input_blueTooth(uart_rx_buffer[0]);
+				//uart_rx_buffer[rx_length] = '\0';
+			}
+			rx_length = 0;
+        }
 		//set macn work
-		
+		setMacbWorkStatus(getBlueMacnStatus());
 		//set work status to pc
 		rt_kprintf("app %s\r\n",ef_get_env("wxc"));
 		rt_thread_delay(100);		
 	}
 }
+rt_err_t uart_input(rt_device_t dev, rt_size_t size)
+{
+    struct rx_msg bluemsg;
+    bluemsg.dev = dev;
+    bluemsg.size = size;
+    rt_mq_send(rx_mq, &bluemsg, sizeof(struct rx_msg));
 
+    return RT_EOK;
+}
+//macn send data to macb
+void app_macn_thread_entry(void *parameter)
+{
+	char *sendbuff;
+	initMacninfo(0x03);
+	rt_device_t device, write_device;
+	rt_err_t result = RT_EOK;
+    device= rt_device_find("uart3");
+    if (device != RT_NULL)
+    {
+        rt_device_set_rx_indicate(device, uart_input);
+        rt_device_open(device, RT_DEVICE_OFLAG_RDWR);
+    }
+	write_device = device;	
+	while(getMacnRunStatus() != MACN_BEGIN)
+	{
+		rt_thread_delay(100);
+	}
+	while(1)
+	{
+		sendbuff = getSendData();
+		if (write_device != RT_NULL)
+			rt_device_write(write_device, 0,sendbuff,7);
+		if(getMacnRunStatus() == MACN_END)
+		{
+			sendbuff = getSendData();
+			if (write_device != RT_NULL)
+				rt_device_write(write_device, 0,sendbuff,7);
+			while(getMacnRunStatus() != MACN_BEGIN)
+			{
+				rt_thread_delay(100);
+			}
+		}
+		rt_thread_delay(100);
+	}
+}
 void rt_app_application_init()
 {
 	rt_thread_t tid;
+	rx_mq = rt_mq_create("mq1",40,64,RT_IPC_FLAG_FIFO);
 	tid = rt_thread_create("app", app_thread_entry, RT_NULL,
                            RT_APP_THREAD_STACK_SIZE, RT_APP_THREAD_PRIORITY, 20);
+    RT_ASSERT(tid != RT_NULL);
+	rt_thread_startup(tid);
+	tid = rt_thread_create("macn", app_macn_thread_entry, RT_NULL,
+                           RT_MACN_THREAD_STACK_SIZE, RT_MACN_THREAD_PRIORITY, 20);
     RT_ASSERT(tid != RT_NULL);
 	rt_thread_startup(tid);
 }
@@ -139,8 +228,7 @@ void LED_NUM_thread_entry(void *parameter)
 	rt_err_t result;
 	int showNum;
 	while(1)
-	{		
-		//rt_pin_write(15,1);
+	{
 		result = rt_mutex_take(ledMutex, 10);
         if (result == RT_EOK)
         {
@@ -149,8 +237,7 @@ void LED_NUM_thread_entry(void *parameter)
         }
 		//shownumIn NUMLED
 		lightNumLed(showNum);
-		rt_thread_delay(100);		
-		//rt_pin_write(15,0);
+		rt_thread_delay(100);
 	}
 }
 
@@ -172,4 +259,6 @@ void rt_led_num_application_init()
 }
 /***************************************LED NUM****************************************/
 
-   
+
+
+
