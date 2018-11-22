@@ -14,16 +14,19 @@
 #include <rtthread.h>
 #include <board.h>
 #include "easyflash.h"
+#include "app.h"
+
 int main(void)
 {
     /* user app entry */
-	easyflash_init();
-	ef_load_env();
-	ef_set_and_save_env("wxc","123456");
-	while(1)
-	{
-		//rt_kprintf("hello world %s\r\n",ef_get_env("wxc"));
-		rt_thread_delay(100);		
-	}	
-    return 0;
+	//easyflash_init();
+	//ef_set_and_save_env("wxc","123456");
+//	int shownum = 0;
+//	rt_err_t result;
+//	while(1)
+//	{
+//		rt_thread_delay(100);
+//		rt_kprintf("time");
+//	}	
+//    return 0;
 }

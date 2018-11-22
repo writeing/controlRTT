@@ -279,7 +279,7 @@ rt_inline int _serial_int_rx(struct rt_serial_device *serial, rt_uint8_t *data, 
 
     rx_fifo = (struct rt_serial_rx_fifo*) serial->serial_rx;
     RT_ASSERT(rx_fifo != RT_NULL);
-
+	//rt_kprintf("into:%d,%d,%d\r\n",length,rx_fifo->get_index,rx_fifo->put_index);
     /* read from software FIFO */
     while (length)
     {
@@ -293,7 +293,8 @@ rt_inline int _serial_int_rx(struct rt_serial_device *serial, rt_uint8_t *data, 
         if ((rx_fifo->get_index == rx_fifo->put_index) && (rx_fifo->is_full == RT_FALSE))
         {
             /* no data, enable interrupt and break out */
-            rt_hw_interrupt_enable(level);
+            rt_hw_interrupt_enable(level);		
+			//rt_kprintf("break:%d,%d,%d\r\n",length,rx_fifo->get_index,rx_fifo->put_index);			
             break;
         }
 
@@ -309,11 +310,11 @@ rt_inline int _serial_int_rx(struct rt_serial_device *serial, rt_uint8_t *data, 
 
         /* enable interrupt */
         rt_hw_interrupt_enable(level);
-
+		
         *data = ch & 0xff;
         data ++; length --;
     }
-
+	//rt_kprintf("end:%d\r\n",length);			
     return size - length;
 }
 
@@ -1009,7 +1010,6 @@ static rt_err_t rt_serial_control(struct rt_device *dev,
                 if (tio == RT_NULL) return -RT_EINVAL;
 
                 config = serial->config;
-
                 baudrate = _get_baudrate(cfgetospeed(tio));
                 config.baud_rate = baudrate;
 

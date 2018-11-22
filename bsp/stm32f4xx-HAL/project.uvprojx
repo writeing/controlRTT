@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER, STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>applications;.;drivers;Libraries\CMSIS\Device\ST\STM32F4xx\Include;Libraries\CMSIS\Include;Libraries\STM32F4xx_HAL_Driver\Inc;packages\EasyFlash-v3.2.1\inc;..\..\include;..\..\libcpu\arm\cortex-m4;..\..\libcpu\arm\common;..\..\components\dfs\include;..\..\components\dfs\filesystems\devfs;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\finsh</IncludePath>
+              <IncludePath>applications;.;drivers;Libraries\CMSIS\Device\ST\STM32F4xx\Include;Libraries\CMSIS\Include;Libraries\STM32F4xx_HAL_Driver\Inc;packages\EasyFlash-v3.2.1\inc;..\..\include;..\..\libcpu\arm\cortex-m4;..\..\libcpu\arm\common;..\..\components\dfs\include;..\..\components\dfs\filesystems\devfs;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\drivers\usb\usbdevice;..\..\components\finsh</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -380,6 +380,16 @@
           <GroupName>Applications</GroupName>
           <Files>
             <File>
+              <FileName>app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>applications\app.c</FilePath>
+            </File>
+            <File>
+              <FileName>bluetooth.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>applications\bluetooth.c</FilePath>
+            </File>
+            <File>
               <FileName>machControl.c</FileName>
               <FileType>1</FileType>
               <FilePath>applications\machControl.c</FilePath>
@@ -388,16 +398,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>applications\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\applications\app.c</FilePath>
-            </File>
-            <File>
-              <FileName>bluetooth.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\applications\bluetooth.c</FilePath>
             </File>
           </Files>
         </Group>

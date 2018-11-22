@@ -7,16 +7,21 @@
 #define BLUE_LEN		0x06
 #define BLUE_DATA		0xA5
 #define BLUE_CRC		0x04
-#define BLUE_TITLE		0xAA
+#define BLUE_TITLE		0xCC
 
 #define BLUE_INITFUNCODE	0x06
-
-#define BLUE_FORWARD     0x10
-#define BLUE_BACKUP      0x20
-#define BLUE_LEFT        0x30
-#define BLUE_RIGHT       0x40
+#define BLUE_STARTCODE		0x02
+#define BLUE_STOPCODE		0x01
 
 
+#define BLUE_FORWARD     0x10000
+#define BLUE_BACKUP      0x20000
+#define BLUE_LEFT        0x30000
+#define BLUE_RIGHT       0x40000
+
+
+#define WXC_OK       1
+#define WXC_ERROR    0
 
 
 
@@ -24,10 +29,10 @@
 
 
 extern void input_blueTooth(unsigned char ch);
-extern unsigned char getBlueMacnStatus(void);
-extern void initBlueSet(void);
-
-
+extern int getBlueMacnStatus(void);
+extern int initBlueSet(void);
+extern void input_blueTooth_cmd(char ch);
+extern void blueCmdSend(int cmd);
 
 
 

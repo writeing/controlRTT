@@ -379,6 +379,7 @@ int hw_usart_init(void)
 #ifdef RT_USING_UART2
     uart = &uart2;
     uart->UartHandle.Instance = USART2;
+	config.baud_rate = BAUD_RATE_4800;
     uart->irq = USART2_IRQn;
     serial2.ops    = &drv_uart_ops;
     serial2.config = config;
@@ -387,20 +388,23 @@ int hw_usart_init(void)
                           RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
                           uart);
 #endif /* RT_USING_UART2 */
+
 #ifdef RT_USING_UART3
     uart = &uart3;
     uart->UartHandle.Instance = USART3;
+	config.baud_rate = BAUD_RATE_115200;
     uart->irq = USART3_IRQn;
     serial3.ops    = &drv_uart_ops;
     serial3.config = config;
     /* register UART3 device */
     rt_hw_serial_register(&serial3, "uart3",
-                          RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX,
-                          uart);
+                          RT_DEVICE_FLAG_RDWR| RT_DEVICE_FLAG_INT_RX,
+                          uart);// 
 #endif /* RT_USING_UART3 */
 #ifdef RT_USING_UART6
     uart = &uart6;
     uart->UartHandle.Instance = USART6;
+	config.baud_rate = BAUD_RATE_115200;
     uart->irq = USART6_IRQn;
     serial6.ops    = &drv_uart_ops;
     serial6.config = config;

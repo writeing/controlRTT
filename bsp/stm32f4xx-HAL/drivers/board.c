@@ -36,8 +36,8 @@ static void SystemClock_Config(void)
 #define CLOCK_SOURE_VALUE  HSE_VALUE
 #endif    
 
-    source_clk = CLOCK_SOURE_VALUE / 1000000UL;
-    sys_clk = HCLK_VALUE / 1000000UL;
+    source_clk = CLOCK_SOURE_VALUE / 1000000UL;	
+    sys_clk = HCLK_VALUE / 1000000UL;	
     RCC_OscInitTypeDef RCC_OscInitStruct;
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
 #if defined(RT_USING_RTC) || defined(RCC_PERIPHCLK_CLK48)
@@ -259,11 +259,13 @@ void HAL_MspInit(void)
 /**
  * This function will initial STM32 board.
  */
+extern int hw_usart_init(void);
 void rt_hw_board_init()
 {
     /* Configure the system clock @ 84 Mhz */
     SystemClock_Config();
     HAL_Init();
+
 #ifdef RT_USING_HEAP
     rt_system_heap_init((void *)HEAP_BEGIN, (void *)HEAP_END);
 #endif
@@ -272,5 +274,5 @@ void rt_hw_board_init()
 #endif
 #ifdef RT_USING_CONSOLE
     rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
-#endif
+#endif	
 }

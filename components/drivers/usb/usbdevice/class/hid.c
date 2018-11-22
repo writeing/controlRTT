@@ -294,8 +294,9 @@ const static struct uhid_comm_descriptor _hid_comm_desc =
         USB_HID_PROTOCOL_MOUSE,     /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
 #endif
         0x00,
+	},
 #endif
-    },
+
 
     /* Interface Descriptor */
     {

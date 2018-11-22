@@ -26,6 +26,8 @@ extern void rt_app_application_init(void);
 extern void rt_led_num_application_init(void);
 
 
+extern void lightNumLed(int speed);
+extern int getSetShowNum(int showNum);
 
 
 
@@ -38,8 +40,7 @@ extern void rt_led_num_application_init(void);
 
 
 
-
-
+extern rt_mutex_t ledMutex;
 
 
 

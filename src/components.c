@@ -135,7 +135,6 @@ void rt_components_init(void)
 void rt_application_init(void);
 void rt_hw_board_init(void);
 int rtthread_startup(void);
-
 #if defined(__CC_ARM) || defined(__CLANG_ARM)
 extern int $Super$$main(void);
 /* re-define main function */
@@ -223,7 +222,6 @@ int rtthread_startup(void)
      * NOTE: please initialize heap inside board initialization.
      */
     rt_hw_board_init();
-
     /* show RT-Thread version */
     rt_show_version();
 
