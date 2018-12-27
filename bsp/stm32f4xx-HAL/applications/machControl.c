@@ -1,5 +1,6 @@
 #include "machControl.h"
 #include <rtthread.h>
+#include "dac.h"
 stuMacnControl g_stumach;
 void _setFucode(char funcode);
 
@@ -149,11 +150,62 @@ void checkMacnData(uint8_t ch)
 			break;
 	}
 }
+
+
+void setRightjoytick(int machdire,int speed)
+{
+	if(machdire == MACN_FORWARD)
+	{
+		if(10 <= speed && speed <= 40)
+		{
+			speed = (int)(((409.6/40)*speed) + 2048*1.3) - 1;
+		}
+		else if(speed > 40 && speed <= 60)
+		{
+			speed = (int)((51.2*(speed-40)) + 2048*1.5) - 1;
+		}
+		goto run;
+	}
+	else if(machdire == MACN_BACKUP)
+	{
+		speed = 2048-(int)(2048/30)*speed;
+		goto run;
+	}
+	else if(machdire == MACN_STOP)
+	{
+		speed = 2048;
+		//end
+		HAL_DAC_SetValue(&hdac,DAC_CHANNEL_1,DAC_ALIGN_12B_R,speed);
+		HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
+		HAL_DAC_SetValue(&hdac,DAC_CHANNEL_1,DAC_ALIGN_12B_R,speed);
+		HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
+		return;
+	}
+	else if(machdire == MACN_LEFT)
+	{
+		speed = 0;
+	}
+	else if(machdire == MACN_RIGHT)
+	{
+		speed = 4096;
+	}
+	rt_kprintf("macndire = %d,speed = %d\r\n",machdire,speed);
+	HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,speed);
+	HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+	return;	
+	run:
+	rt_kprintf("macndire = %d,speed = %d\r\n",machdire,speed);
+	HAL_DAC_SetValue(&hdac,DAC_CHANNEL_1,DAC_ALIGN_12B_R,speed);
+	HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
+	return;
+	
+}
 void setMacbWorkStatus(int status)
 {
 	uint8_t macndire = status >> 16;
 	uint8_t macnSpeed = status & 0x0FFFF;
-	rt_kprintf("macndire = %d\r\n",macndire);
+	
+	setRightjoytick(macndire,macnSpeed);
 	switch(macndire)
 	{
 		case MACN_FORWARD:
@@ -170,6 +222,10 @@ void setMacbWorkStatus(int status)
 			setSendData(0,0);
 			//setSendData(macndire,macnSpeed);
 			break;		
+		case MACN_STOP:
+			setSendData(0,0);
+			//setSendData(macndire,macnSpeed);
+			break;			
 	}	
 }
 

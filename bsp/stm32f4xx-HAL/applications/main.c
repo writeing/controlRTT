@@ -15,18 +15,17 @@
 #include <board.h>
 #include "easyflash.h"
 #include "app.h"
-
+#include "dac.h"
 int main(void)
-{
+{ 
+	MX_DAC_Init();
+	
     /* user app entry */
-	//easyflash_init();
-	//ef_set_and_save_env("wxc","123456");
-//	int shownum = 0;
 //	rt_err_t result;
-//	while(1)
-//	{
-//		rt_thread_delay(100);
-//		rt_kprintf("time");
-//	}	
+	while(1)
+	{
+		rt_thread_delay(100);
+		//rt_kprintf("time");
+	}	
 //    return 0;
 }

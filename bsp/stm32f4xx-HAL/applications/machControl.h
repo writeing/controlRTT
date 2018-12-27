@@ -18,9 +18,9 @@
 	 
 #define MACN_FORWARD     0x01
 #define MACN_BACKUP      0x02
-#define MACN_LEFT        0x03
-#define MACN_RIGHT       0x04
-	 
+#define MACN_LEFT        0x04
+#define MACN_RIGHT       0x08
+#define MACN_STOP        0x00	 
 	 
 #define MACN_BEGIN		0x01
 #define MACN_END		0x02

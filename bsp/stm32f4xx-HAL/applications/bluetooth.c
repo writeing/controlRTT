@@ -88,7 +88,7 @@ void input_blueTooth(uint8_t ch)
 }
 
 
-int s_initRevData[BLUE_LEN/2] = {0};
+static int s_initRevData[BLUE_LEN/2] = {0};
 void _initBlueStatus(uint8_t * blueData)
 {	
 	for(int i = 0 ; i < BLUE_LEN/2 ; i++)
@@ -99,12 +99,17 @@ void _initBlueStatus(uint8_t * blueData)
 	{
 		s_initRevData[1] -= 65535;
 	}
-	rt_kprintf("init:%d\r\n",s_initRevData[1]);
+	if(s_initRevData[0] > 0x8000)
+	{
+		s_initRevData[0] -= 65535;
+	}
+	rt_kprintf("init:%d,%d\r\n",s_initRevData[1],s_initRevData[0]);
 }
 static int MacnWorkStatus;
 static int _MacnWorkStatus;
 void _ansyBlueStatus(uint8_t * blueData)
 {	
+	static int dire = BLUE_FORWARD;
 	short data = 0;
 	MacnWorkStatus = 0;
 	int revData[BLUE_LEN/2] = {0};
@@ -112,18 +117,54 @@ void _ansyBlueStatus(uint8_t * blueData)
 	{
 		revData[i] = (blueData[i*2] << 8 | blueData[i*2+1]);
 	}
+
 	if(revData[1] > 0x8000)
 	{
 		revData[1] -= 65535;
 	}
+	if(revData[0] > 0x8000)
+	{
+		revData[0] -= 65535;
+	}
+//	rt_kprintf("0:%d,%d\r\n",revData[0],s_initRevData[0]);
+	float rl_diffSpeed = 0;
+//	if(revData[0] - s_initRevData[0] >= 0)
+//	{
+//		//zuo you zhuan
+//		rl_diffSpeed = revData[0] - s_initRevData[0];		
+//		if(rl_diffSpeed > 20)
+//		{
+//			data = 60;
+//			MacnWorkStatus |= BLUE_RIGHT;
+//			goto end;
+//		}
+//	}
+//	else
+//	{
+//		rl_diffSpeed = s_initRevData[0] - revData[0];	
+//		
+//		if(rl_diffSpeed > 20)
+//		{
+//			data = 60;
+//			MacnWorkStatus |= BLUE_LEFT;
+//			goto end;
+//		}
+//		
+//	}
 	//rt_kprintf("rev:%d\r\n",revData[1]);
-	//clac macn work status	
+	//clac macn work status
 	float diffSpeed = 0;
-	if(revData[1] - s_initRevData[1] > 0)
+	if(revData[1] - s_initRevData[1] >= 0)
 	{
 		diffSpeed = revData[1] - s_initRevData[1];		
-		//a = 
-		data = (short)((6*diffSpeed/(100-s_initRevData[1]))*10);
+		if(diffSpeed > 5 && diffSpeed  < 15)
+		{
+			data = (short)((0.2*diffSpeed)*10);
+		}
+		else if(diffSpeed >= 15)
+		{
+			data = (short)((0.6*diffSpeed - 6)*10);
+		}
 		MacnWorkStatus |=BLUE_FORWARD ;
 		if(data > 60)
 		{
@@ -135,24 +176,31 @@ void _ansyBlueStatus(uint8_t * blueData)
 		}
 	}
 	else
-	{
+	{		
 		diffSpeed = s_initRevData[1] - revData[1];		
-		data = (short)((4*diffSpeed/(s_initRevData[1]))*10);		
+		data = (short)((0.15*diffSpeed)*10);	
 		MacnWorkStatus |=BLUE_BACKUP ;
-		if(data > 40)
+		if(data > 30)
 		{
-			data = 40;
+			data = 30;
 		}
 		if(data < 0)
 		{
 			data = 0;
 		}		
 	}
-	 
-	//char data = ((char)(0.147*pow(diffSpeed,1.1271))&0x0F);
+	if(diffSpeed < 5)
+	{
+		data = 0;
+		MacnWorkStatus &= BLUE_STOP;
+	}
 	MacnWorkStatus |= data ;
 	_MacnWorkStatus = MacnWorkStatus;
-	//rt_kprintf("MacnWorkStatus:%x",MacnWorkStatus);
+	//char data = ((char)(0.147*pow(diffSpeed,1.1271))&0x0F);
+//	end:
+//	rt_kprintf("0:%f\r\n",rl_diffSpeed);
+//	MacnWorkStatus |= data ;
+//	_MacnWorkStatus = MacnWorkStatus;
 }
 
 int getBlueMacnStatus()

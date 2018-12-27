@@ -139,7 +139,7 @@ void app_macn_thread_entry(void *parameter)
 			rt_device_write(write_device, 0,sendbuff,MACN_SEND_DATA_LEN);
 			for(int i = 0 ; i < MACN_SEND_DATA_LEN ; i ++)
 			{
-				rt_kprintf(" %02x ",sendbuff[i]);
+				//rt_kprintf(" %02x ",sendbuff[i]);
 			}
 		}
 		while(getMacnRunStatus() != MACN_BEGIN)

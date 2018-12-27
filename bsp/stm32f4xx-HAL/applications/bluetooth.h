@@ -16,9 +16,9 @@
 
 #define BLUE_FORWARD     0x10000
 #define BLUE_BACKUP      0x20000
-#define BLUE_LEFT        0x30000
-#define BLUE_RIGHT       0x40000
-
+#define BLUE_LEFT        0x40000
+#define BLUE_RIGHT       0x80000
+#define BLUE_STOP	     0x00000
 
 #define WXC_OK       1
 #define WXC_ERROR    0
