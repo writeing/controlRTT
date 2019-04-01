@@ -3,7 +3,7 @@
 #include <stm32f4xx_hal.h>
 
 
-
+//**********begin sys define 
 #define NUM1_Pin GPIO_PIN_8
 #define NUM1_GPIO_Port GPIOE
 #define NUM2_Pin GPIO_PIN_9
@@ -20,32 +20,63 @@
 #define KEY_3_GPIO_Port GPIOC
 #define KEY_4_Pin GPIO_PIN_3
 #define KEY_4_GPIO_Port GPIOC
+//**********end sys define 
 
+//************begin user define CONFIG
+#define DEVICE_NONE      0
+#define DEVICE_BEGIN     1
+#define DEVICE_END       2
 
+#define DEVICE_KEY			1
+#define MODE_KEY			2
+
+//define debug config
+#define DEVICE_RUN_BODY_DATA				HAL_OK
+#define DEVICE_CE_BODY_DATA					HAL_OK
+#define DEVICE_RIGHT_BODY_DATA				HAL_OK
+#define DEVICE_MACH_PRINT					HAL_OK	
+#define DEVICE_BLUE_PRINT_DATA_INTERVAL		10
+
+//***********end user define CONFIG
+
+//***********begin user define func
 extern void rt_app_application_init(void);
 extern void rt_led_num_application_init(void);
-
-
 extern void lightNumLed(int speed);
 extern int getSetShowNum(int showNum);
+extern void initExternFlash(void);		//in main thread   init extern flash
+
+extern void rt_MacnApp_application_init(void);
+extern void rt_BlueApp_application_init(void);
+extern void getBlueCmdData(void);
+//***********end user define func
+
+//***********begin user define value
+typedef struct flashData
+{
+	char blueDevice[20];
+	char bodyAngle;
+	char qMaxSpeed;
+	char hMaxSpeed;	
+	char runmode;
+	char stoptui;
+	char stoprun;	
+	char houJiaoDu;
+}stuFlashData;
 
 
+struct rx_msg
+{
+	rt_device_t dev;
+	rt_size_t size;
+};
 
 
-
-
-
-
-
-
-
+//***********end user define value
 
 extern rt_mutex_t ledMutex;
-
-
-
-
-
+extern  uint8_t deviceStatus;
+extern int blue_data_type;
 
 
 

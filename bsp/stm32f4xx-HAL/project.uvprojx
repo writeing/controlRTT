@@ -404,6 +404,26 @@
               <FileType>1</FileType>
               <FilePath>.\applications\dac.c</FilePath>
             </File>
+            <File>
+              <FileName>debugUsart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\debugUsart.c</FilePath>
+            </File>
+            <File>
+              <FileName>flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>blueApp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\blueApp.c</FilePath>
+            </File>
+            <File>
+              <FileName>macnApp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\macnApp.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -768,51 +788,6 @@
               <FileName>stm32f4xx_hal_wwdg.c</FileName>
               <FileType>1</FileType>
               <FilePath>Libraries\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_wwdg.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>EasyFlash</GroupName>
-          <Files>
-            <File>
-              <FileName>easyflash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\EasyFlash-v3.2.1\src\easyflash.c</FilePath>
-            </File>
-            <File>
-              <FileName>ef_cmd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\EasyFlash-v3.2.1\src\ef_cmd.c</FilePath>
-            </File>
-            <File>
-              <FileName>ef_env.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\EasyFlash-v3.2.1\src\ef_env.c</FilePath>
-            </File>
-            <File>
-              <FileName>ef_env_wl.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\EasyFlash-v3.2.1\src\ef_env_wl.c</FilePath>
-            </File>
-            <File>
-              <FileName>ef_iap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\EasyFlash-v3.2.1\src\ef_iap.c</FilePath>
-            </File>
-            <File>
-              <FileName>ef_log.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\EasyFlash-v3.2.1\src\ef_log.c</FilePath>
-            </File>
-            <File>
-              <FileName>ef_utils.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\EasyFlash-v3.2.1\src\ef_utils.c</FilePath>
-            </File>
-            <File>
-              <FileName>ef_fal_port.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\packages\EasyFlash-v3.2.1\ports\ef_fal_port.c</FilePath>
             </File>
           </Files>
         </Group>

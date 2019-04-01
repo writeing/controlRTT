@@ -213,7 +213,6 @@ void rt_application_init(void)
 
     rt_thread_startup(tid);
 }
-
 int rtthread_startup(void)
 {
     rt_hw_interrupt_disable();
@@ -237,6 +236,8 @@ int rtthread_startup(void)
 #endif
 
     /* create init_thread */
+	
+	initExternFlash();
     rt_application_init();
 	
 	rt_app_application_init();

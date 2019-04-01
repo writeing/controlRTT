@@ -41,6 +41,7 @@
 
 #include "finsh.h"
 #include "shell.h"
+#include "debugUsart.h"
 
 #ifdef FINSH_USING_MSH
 #include "msh.h"
@@ -528,140 +529,142 @@ void finsh_thread_entry(void *parameter)
          * right key:0x1b 0x5b 0x43
          * left key: 0x1b 0x5b 0x44
          */
-        if (ch == 0x1b)
-        {
-            shell->stat = WAIT_SPEC_KEY;
-            continue;
-        }
-        else if (shell->stat == WAIT_SPEC_KEY)
-        {
-            if (ch == 0x5b)
-            {
-                shell->stat = WAIT_FUNC_KEY;
-                continue;
-            }
+//        if (ch == 0x1b)
+//        {
+//            shell->stat = WAIT_SPEC_KEY;
+//            continue;
+//        }
+//        else if (shell->stat == WAIT_SPEC_KEY)
+//        {
+//            if (ch == 0x5b)
+//            {
+//                shell->stat = WAIT_FUNC_KEY;
+//                continue;
+//            }
 
-            shell->stat = WAIT_NORMAL;
-        }
-        else if (shell->stat == WAIT_FUNC_KEY)
-        {
-            shell->stat = WAIT_NORMAL;
+//            shell->stat = WAIT_NORMAL;
+//        }
+//        else if (shell->stat == WAIT_FUNC_KEY)
+//        {
+//            shell->stat = WAIT_NORMAL;
 
-            if (ch == 0x41) /* up key */
-            {
-#ifdef FINSH_USING_HISTORY
-                /* prev history */
-                if (shell->current_history > 0)
-                    shell->current_history --;
-                else
-                {
-                    shell->current_history = 0;
-                    continue;
-                }
+//            if (ch == 0x41) /* up key */
+//            {
+//#ifdef FINSH_USING_HISTORY
+//                /* prev history */
+//                if (shell->current_history > 0)
+//                    shell->current_history --;
+//                else
+//                {
+//                    shell->current_history = 0;
+//                    continue;
+//                }
 
-                /* copy the history command */
-                memcpy(shell->line, &shell->cmd_history[shell->current_history][0],
-                       FINSH_CMD_SIZE);
-                shell->line_curpos = shell->line_position = strlen(shell->line);
-                shell_handle_history(shell);
-#endif
-                continue;
-            }
-            else if (ch == 0x42) /* down key */
-            {
-#ifdef FINSH_USING_HISTORY
-                /* next history */
-                if (shell->current_history < shell->history_count - 1)
-                    shell->current_history ++;
-                else
-                {
-                    /* set to the end of history */
-                    if (shell->history_count != 0)
-                        shell->current_history = shell->history_count - 1;
-                    else
-                        continue;
-                }
+//                /* copy the history command */
+//                memcpy(shell->line, &shell->cmd_history[shell->current_history][0],
+//                       FINSH_CMD_SIZE);
+//                shell->line_curpos = shell->line_position = strlen(shell->line);
+//                shell_handle_history(shell);
+//#endif
+//                continue;
+//            }
+//            else if (ch == 0x42) /* down key */
+//            {
+//#ifdef FINSH_USING_HISTORY
+//                /* next history */
+//                if (shell->current_history < shell->history_count - 1)
+//                    shell->current_history ++;
+//                else
+//                {
+//                    /* set to the end of history */
+//                    if (shell->history_count != 0)
+//                        shell->current_history = shell->history_count - 1;
+//                    else
+//                        continue;
+//                }
 
-                memcpy(shell->line, &shell->cmd_history[shell->current_history][0],
-                       FINSH_CMD_SIZE);
-                shell->line_curpos = shell->line_position = strlen(shell->line);
-                shell_handle_history(shell);
-#endif
-                continue;
-            }
-            else if (ch == 0x44) /* left key */
-            {
-                if (shell->line_curpos)
-                {
-                    rt_kprintf("\b");
-                    shell->line_curpos --;
-                }
+//                memcpy(shell->line, &shell->cmd_history[shell->current_history][0],
+//                       FINSH_CMD_SIZE);
+//                shell->line_curpos = shell->line_position = strlen(shell->line);
+//                shell_handle_history(shell);
+//#endif
+//                continue;
+//            }
+//            else if (ch == 0x44) /* left key */
+//            {
+//                if (shell->line_curpos)
+//                {
+//                    rt_kprintf("\b");
+//                    shell->line_curpos --;
+//                }
 
-                continue;
-            }
-            else if (ch == 0x43) /* right key */
-            {
-                if (shell->line_curpos < shell->line_position)
-                {
-                    rt_kprintf("%c", shell->line[shell->line_curpos]);
-                    shell->line_curpos ++;
-                }
+//                continue;
+//            }
+//            else if (ch == 0x43) /* right key */
+//            {
+//                if (shell->line_curpos < shell->line_position)
+//                {
+//                    rt_kprintf("%c", shell->line[shell->line_curpos]);
+//                    shell->line_curpos ++;
+//                }
 
-                continue;
-            }
-        }
+//                continue;
+//            }
+//        }
 
-        /* received null or error */
-        if (ch == '\0' || ch == 0xFF) continue;
-        /* handle tab key */
-        else if (ch == '\t')
-        {
-            int i;
-            /* move the cursor to the beginning of line */
-            for (i = 0; i < shell->line_curpos; i++)
-                rt_kprintf("\b");
+//        /* received null or error */
+//        if (ch == '\0' || ch == 0xFF) continue;
+//        /* handle tab key */
+//        else if (ch == '\t')
+//        {
+//            int i;
+//            /* move the cursor to the beginning of line */
+//            for (i = 0; i < shell->line_curpos; i++)
+//                rt_kprintf("\b");
 
-            /* auto complete */
-            shell_auto_complete(&shell->line[0]);
-            /* re-calculate position */
-            shell->line_curpos = shell->line_position = strlen(shell->line);
+//            /* auto complete */
+//            shell_auto_complete(&shell->line[0]);
+//            /* re-calculate position */
+//            shell->line_curpos = shell->line_position = strlen(shell->line);
 
-            continue;
-        }
-        /* handle backspace key */
-        else if (ch == 0x7f || ch == 0x08)
-        {
-            /* note that shell->line_curpos >= 0 */
-            if (shell->line_curpos == 0)
-                continue;
+//            continue;
+//        }
+//        /* handle backspace key */
+//        else if (ch == 0x7f || ch == 0x08)
+//        {
+//            /* note that shell->line_curpos >= 0 */
+//            if (shell->line_curpos == 0)
+//                continue;
 
-            shell->line_position--;
-            shell->line_curpos--;
+//            shell->line_position--;
+//            shell->line_curpos--;
 
-            if (shell->line_position > shell->line_curpos)
-            {
-                int i;
+//            if (shell->line_position > shell->line_curpos)
+//            {
+//                int i;
 
-                rt_memmove(&shell->line[shell->line_curpos],
-                           &shell->line[shell->line_curpos + 1],
-                           shell->line_position - shell->line_curpos);
-                shell->line[shell->line_position] = 0;
+//                rt_memmove(&shell->line[shell->line_curpos],
+//                           &shell->line[shell->line_curpos + 1],
+//                           shell->line_position - shell->line_curpos);
+//                shell->line[shell->line_position] = 0;
 
-                rt_kprintf("\b%s  \b", &shell->line[shell->line_curpos]);
+//                rt_kprintf("\b%s  \b", &shell->line[shell->line_curpos]);
 
-                /* move the cursor to the origin position */
-                for (i = shell->line_curpos; i <= shell->line_position; i++)
-                    rt_kprintf("\b");
-            }
-            else
-            {
-                rt_kprintf("\b \b");
-                shell->line[shell->line_position] = 0;
-            }
+//                /* move the cursor to the origin position */
+//                for (i = shell->line_curpos; i <= shell->line_position; i++)
+//                    rt_kprintf("\b");
+//            }
+//            else
+//            {
+//                rt_kprintf("\b \b");
+//                shell->line[shell->line_position] = 0;
+//            }
 
-            continue;
-        }
-
+//            continue;
+//        }
+		//write myself code
+		debugAnsy(ch);
+		continue;
         /* handle end of line, break */
         if (ch == '\r' || ch == '\n')
         {

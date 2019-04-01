@@ -6,6 +6,7 @@
 #include "easyflash.h"
 #include "stdlib.h"
 #include "stdio.h"
+#include "app.h"
 extern rt_device_t Bluewrite_device;
 void _ansyBlueStatus(uint8_t * blueData);
 void _initBlueStatus(uint8_t * blueData);
@@ -13,10 +14,10 @@ void input_blueTooth(uint8_t ch)
 {
 	static uint8_t blueFlag = BLUE_HEAD;
 	static uint8_t blueStatus[BLUE_LEN];
-	static uint8_t addCrc[2];
+	//static uint8_t addCrc[2];
 	static int revCount = 0;
 	static int funCode = 0;
-	short crc = 0;
+//	short crc = 0;
 	//rt_kprintf("%x\r\n",ch);
 	switch(blueFlag)
 	{
@@ -48,30 +49,16 @@ void input_blueTooth(uint8_t ch)
 			}
 			break;
 		case BLUE_CRC:			
-			addCrc[revCount++] = ch;
+			//addCrc[revCount++] = ch;
 			if(revCount == 2)
 			{
 				blueFlag = BLUE_TITLE;
-//				for(int i = 0 ; i < BLUE_LEN ; i ++)
-//				{				
-//					crc += blueStatus[i];
-//				}		
-//				if(addCrc[0] == (((short)(BLUE_FUNCODE + BLUE_LEN + crc))>>8) && (addCrc[1] == (((short)(BLUE_FUNCODE + BLUE_LEN + crc)) & 0x00FF)))
-//				{
-//					blueFlag = BLUE_TITLE;
-//				}
-//				else
-//				{
-//					blueFlag = BLUE_HEAD;
-//				}
-				revCount = 0;
-				
+				revCount = 0;				
 			}	
 			break;
 		case BLUE_TITLE:
 			if(ch == BLUE_TITLE)
-			{
-				
+			{				
 				//rev data finsh and set status
 				if(BLUE_INITFUNCODE == funCode)
 				{										
@@ -89,123 +76,206 @@ void input_blueTooth(uint8_t ch)
 
 
 static int s_initRevData[BLUE_LEN/2] = {0};
+//what is this?
+static int runA = 4;
+static int runB = -20;
+
+void getRunFuncData()
+{
+	runA = g_flashData.qMaxSpeed/(g_flashData.bodyAngle - g_flashData.stoprun);
+	runB = -1 * g_flashData.stoprun * runA;
+}
 void _initBlueStatus(uint8_t * blueData)
 {	
 	for(int i = 0 ; i < BLUE_LEN/2 ; i++)
 	{
 		s_initRevData[i] = (blueData[i*2] << 8 | blueData[i*2+1]);
 	}
+	if(s_initRevData[0] > 0x8000)
+	{
+		s_initRevData[0] -= 65535;
+	}	
 	if(s_initRevData[1] > 0x8000)
 	{
 		s_initRevData[1] -= 65535;
 	}
-	if(s_initRevData[0] > 0x8000)
+	if(s_initRevData[2] > 0x8000)
 	{
-		s_initRevData[0] -= 65535;
+		s_initRevData[2] -= 65535;
 	}
-	rt_kprintf("init:%d,%d\r\n",s_initRevData[1],s_initRevData[0]);
+	getRunFuncData();
+	//rt_kprintf("init:%d,%d\r\n",s_initRevData[1],s_initRevData[0]);
 }
-static int MacnWorkStatus;
-static int _MacnWorkStatus;
+int MacnWorkStatus;
+//static int _MacnWorkStatus;
+
+stuBodyExecInfo gBodyExecInfo;
+
+int getRunData(int revData)
+{
+	int rpy = WXC_OK;
+	short data = 0;
+	MacnWorkStatus = 0;
+	if(revData > 0x8000)
+	{
+		revData -= 65535;
+	}
+	float diffSpeed = revData - s_initRevData[1];			//jiaodu 
+	if(diffSpeed >= g_flashData.stoprun)
+	{
+		data = (short)(runA*diffSpeed +runB);
+		MacnWorkStatus |=BLUE_FORWARD ;
+		data = data>g_flashData.qMaxSpeed?g_flashData.qMaxSpeed:data;
+		data = data<=0?0:data;
+	}
+	else if(diffSpeed < g_flashData.stoptui)
+	{		
+		if(diffSpeed < 0)
+			diffSpeed *= -1;
+		data = (short)(3*diffSpeed);	
+		MacnWorkStatus |=BLUE_BACKUP;
+		data = data>g_flashData.hMaxSpeed?g_flashData.hMaxSpeed:data;
+		data = data<=0?0:data;		
+	}
+	else
+	{
+		data = 0;
+		MacnWorkStatus = BLUE_STOP;
+	}
+	data = getClacData(data);
+	MacnWorkStatus |= data;
+	gBodyExecInfo.run = MacnWorkStatus;
+	//rt_kprintf("run:%x\r\n",gBodyExecInfo.run);
+	return rpy;
+}
+
+int getRightData(int revData)
+{
+	int rpy = WXC_OK;
+	short data = 0;
+	MacnWorkStatus = 0;
+	if(revData > 0x8000)
+	{
+		revData -= 65535;
+	}
+	float diffSpeed = revData - s_initRevData[2];
+	if(diffSpeed >= 5)
+	{
+		//zuo you zhuan	
+		data = (short)(4*diffSpeed - 20);
+		MacnWorkStatus |= BLUE_RIGHT;	
+	}
+	else if(diffSpeed < -5)
+	{
+		diffSpeed *= -1;
+		data = (short)(4*diffSpeed - 20);
+		MacnWorkStatus |= BLUE_LEFT;
+		
+	}
+	else
+	{
+		data = 0;
+		MacnWorkStatus |= BLUE_RIGHT;
+	}
+	MacnWorkStatus |= data ;
+	gBodyExecInfo.right = MacnWorkStatus;
+	rt_kprintf("right:%x\r\n",gBodyExecInfo.right);
+	return rpy;
+}
+
+int getCeBodyData(int revData)
+{
+	int rpy = WXC_OK;
+	short data = 0;
+	MacnWorkStatus = 0;
+	if(revData > 0x8000)
+	{
+		revData -= 65535;
+	}
+	float diffSpeed = revData - s_initRevData[2];
+	if(diffSpeed >= 5)
+	{
+		//zuo you zhuan	
+		data = (short)(4*diffSpeed - 20);
+		MacnWorkStatus |= BLUE_CELEFT;	
+	}
+	else if(diffSpeed < -5)
+	{
+		diffSpeed *= -1;
+		data = (short)(4*diffSpeed - 20);
+		MacnWorkStatus |= BLUE_CERIGHT;
+		
+	}
+	else
+	{
+		data = 0;
+		MacnWorkStatus |= BLUE_CERIGHT;
+	}
+	MacnWorkStatus |= data ;
+	gBodyExecInfo.ceBody = MacnWorkStatus;
+	rt_kprintf("ceBody:%x\r\n",gBodyExecInfo.ceBody);
+	return rpy;
+}
+
 void _ansyBlueStatus(uint8_t * blueData)
 {	
-	static int dire = BLUE_FORWARD;
-	short data = 0;
 	MacnWorkStatus = 0;
 	int revData[BLUE_LEN/2] = {0};
 	for(int i = 0 ; i < BLUE_LEN/2 ; i++)
 	{
 		revData[i] = (blueData[i*2] << 8 | blueData[i*2+1]);
 	}
+	
+//clac macn work status
+#if DEVICE_CE_BODY_DATA == HAL_OK
+	getCeBodyData(revData[0]);	
+#endif	
+#if DEVICE_RUN_BODY_DATA == HAL_OK	
+	getRunData(revData[1]);
+#endif	
+#if DEVICE_RIGHT_BODY_DATA == HAL_OK		
+	getRightData(revData[2]);
+#endif	
+	return;
 
-	if(revData[1] > 0x8000)
-	{
-		revData[1] -= 65535;
-	}
-	if(revData[0] > 0x8000)
-	{
-		revData[0] -= 65535;
-	}
-//	rt_kprintf("0:%d,%d\r\n",revData[0],s_initRevData[0]);
-	float rl_diffSpeed = 0;
-//	if(revData[0] - s_initRevData[0] >= 0)
-//	{
-//		//zuo you zhuan
-//		rl_diffSpeed = revData[0] - s_initRevData[0];		
-//		if(rl_diffSpeed > 20)
-//		{
-//			data = 60;
-//			MacnWorkStatus |= BLUE_RIGHT;
-//			goto end;
-//		}
-//	}
-//	else
-//	{
-//		rl_diffSpeed = s_initRevData[0] - revData[0];	
-//		
-//		if(rl_diffSpeed > 20)
-//		{
-//			data = 60;
-//			MacnWorkStatus |= BLUE_LEFT;
-//			goto end;
-//		}
-//		
-//	}
-	//rt_kprintf("rev:%d\r\n",revData[1]);
-	//clac macn work status
-	float diffSpeed = 0;
-	if(revData[1] - s_initRevData[1] >= 0)
-	{
-		diffSpeed = revData[1] - s_initRevData[1];		
-		if(diffSpeed > 5 && diffSpeed  < 15)
-		{
-			data = (short)((0.2*diffSpeed)*10);
-		}
-		else if(diffSpeed >= 15)
-		{
-			data = (short)((0.6*diffSpeed - 6)*10);
-		}
-		MacnWorkStatus |=BLUE_FORWARD ;
-		if(data > 60)
-		{
-			data = 60;
-		}
-		if(data < 0)
-		{
-			data = 0;
-		}
-	}
-	else
-	{		
-		diffSpeed = s_initRevData[1] - revData[1];		
-		data = (short)((0.15*diffSpeed)*10);	
-		MacnWorkStatus |=BLUE_BACKUP ;
-		if(data > 30)
-		{
-			data = 30;
-		}
-		if(data < 0)
-		{
-			data = 0;
-		}		
-	}
-	if(diffSpeed < 5)
-	{
-		data = 0;
-		MacnWorkStatus &= BLUE_STOP;
-	}
-	MacnWorkStatus |= data ;
-	_MacnWorkStatus = MacnWorkStatus;
-	//char data = ((char)(0.147*pow(diffSpeed,1.1271))&0x0F);
-//	end:
-//	rt_kprintf("0:%f\r\n",rl_diffSpeed);
-//	MacnWorkStatus |= data ;
-//	_MacnWorkStatus = MacnWorkStatus;
 }
 
-int getBlueMacnStatus()
+short getClacData(short tData)
 {
-	return _MacnWorkStatus;
+	static short s_data[CALC_DATA_COUNT];
+	static int s_index = 0;
+	static double count = 0;
+	short temp;
+	count ++;
+	s_data[s_index++] = tData;
+	s_index = s_index%CALC_DATA_COUNT;
+	if(count < CALC_DATA_COUNT)
+	{
+		return tData;
+	}
+	double sum = 0;
+	for(int i = 0 ; i < CALC_DATA_COUNT ; i ++)
+	{
+		sum += s_data[i];
+	}
+	temp = (short)(sum/CALC_DATA_COUNT);
+	if(tData > temp*1.2)
+	{
+		temp = temp*1.2;
+	}
+	else if(tData < temp*0.8)
+	{
+		temp = temp*0.8;
+	}
+	else
+	{
+		temp = tData;
+	}
+	return temp;
+}
+stuBodyExecInfo getBlueMacnStatus()
+{
+	return gBodyExecInfo;
 }
 int _get_Blue_CON()
 {
@@ -220,12 +290,11 @@ void _set_Blue_At(int st)
 	rt_pin_write(51,st);
 }
 
-//rt_device_write(write_device, 0,sendbuff,MACN_SEND_DATA_LEN);
 void sendBuffer(uint8_t *buff)
 {	
 	rt_device_write(Bluewrite_device,0,buff,strlen((char *)buff));
+	//rt_kprintf("%s",buff);
 }
-
 void _sendCmdToBlue(uint8_t *buff,int len)
 {	
 	for(int i = 0 ; i < len ; i ++)
@@ -234,6 +303,7 @@ void _sendCmdToBlue(uint8_t *buff,int len)
 	}
 	rt_device_write(Bluewrite_device,0,buff,len);
 }
+//send data to blue
 void blueCmdSend(int cmd)
 {
 	//0 start
@@ -249,65 +319,43 @@ void blueCmdSend(int cmd)
 	buff[i++] = 0xAA;	//title
 	_sendCmdToBlue((uint8_t *)buff,i);
 }
-
 int initBlueSet()
 {
-	static int g_blueToothFalg = 0;
-	g_blueToothFalg = 0;
 	sendBuffer((uint8_t *)"AT+KBYTE3");
 	rt_thread_delay(1000);
 	if(_get_Blue_CON() == PIN_HIGH)
 	{
 		// had connect
-		rt_kprintf("had connect\r\n");
+		//rt_kprintf("had connect %d\r\n",_get_Blue_CON());
 		//sendBuffer((uint8_t *)"hello world\r\n");
 		_set_Blue_At(PIN_HIGH);
-		g_blueToothFalg = 1;
 		return WXC_OK;
 	}
-	sendBuffer((uint8_t *)"AT+MAC");
-	rt_thread_delay(1000);
 	sendBuffer((uint8_t *)"AT+HOSTEN1");
 	rt_thread_delay(1000);
 	sendBuffer((uint8_t *)"AT+SCAN1");
 	rt_thread_delay(3000);
 	if(_get_Blue_CON() == PIN_HIGH)
 	{
-		rt_kprintf("had connect\r\n");
-		g_blueToothFalg = 1;
+		//rt_kprintf("had connect\r\n");
 		return WXC_OK;
 	}
 	sendBuffer((uint8_t *)"AT+RSLV");
 	rt_thread_delay(1000);	
-//	if(strlen(ef_get_env("blueCcid")) == 0)
-//	{
-//		sendBuffer((uint8_t *)"AT+RSLV");
-//		rt_thread_delay(1000);
-//	}
 	uint32_t time = rt_tick_get();
-//	while(strlen(ef_get_env("blueCcid")) == 0 && rt_tick_get() - time < 10000)
-//	{
-//		rt_thread_delay(300);
-//	}
-//	if(strlen(ef_get_env("blueCcid")) == 0)
-//	{
-//		//connect error
-//		g_blueToothFalg = WXC_ERROR;
-//		return g_blueToothFalg;
-//	}
 	char buff[100] = {0};
-	sprintf(buff,"AT+BAND6AC2D2F21942\0");//ef_get_env("blueCcid")
+	sprintf(buff,"AT+BAND%s\0",g_flashData.blueDevice);//ef_get_env("blueCcid")
 	sendBuffer((uint8_t *)buff);
 	rt_thread_delay(1000);
 	memset(buff,0,100);
-	sprintf(buff,"AT+CONNET6AC2D2F21942\0");//ef_get_env("blueCcid")
+	sprintf(buff,"AT+CONNET%s\0",g_flashData.blueDevice);//ef_get_env("blueCcid")
 	sendBuffer((uint8_t *)buff);
 	rt_thread_delay(1000);
 	time = rt_tick_get();
-	while(_get_Blue_CON() != PIN_HIGH && rt_tick_get() - time < 3000)
+	while(_get_Blue_CON() != PIN_HIGH && rt_tick_get() - time < 30000)
 	{
 		rt_thread_delay(500);
-		rt_kprintf("wait connet\r\n");
+		//rt_kprintf("wait connet\r\n");
 	}
 	if(_get_Blue_CON() != PIN_HIGH)
 	{
@@ -317,11 +365,23 @@ int initBlueSet()
 	}
 	else
 	{		
-		rt_kprintf("had connect\r\n");
+		//rt_kprintf("had connect\r\n");
 		return WXC_OK;
 	}
-	g_blueToothFalg = WXC_OK;
-	return g_blueToothFalg;
+}
+int getBlueConnectStatus()
+{
+	if(_get_Blue_CON() == PIN_HIGH)
+	{
+		return 1;
+	}
+	else
+		return 0;
+}
+
+static void _ansyBlueCmdData(char * revbuff,int len)
+{
+	rt_kprintf("blue rev :%S,%d\r\n",revbuff,len);
 }
 void input_blueTooth_cmd(char ch)
 {
@@ -330,6 +390,8 @@ void input_blueTooth_cmd(char ch)
 	s_buff[s_index++] = ch;
 	if(ch == 0xAA)
 	{
+		//had end rev data
+		_ansyBlueCmdData(s_buff,s_index);
 		s_index = 0;
 	}
 }

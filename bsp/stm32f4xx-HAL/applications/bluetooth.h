@@ -1,6 +1,6 @@
 #ifndef __BLUETOOTH__
 #define __BLUETOOTH__
-
+#include "app.h"
 #define NONE			0
 #define BLUE_HEAD		0x55
 #define BLUE_FUNCODE	0x03
@@ -14,27 +14,40 @@
 #define BLUE_STOPCODE		0x01
 
 
-#define BLUE_FORWARD     0x10000
-#define BLUE_BACKUP      0x20000
-#define BLUE_LEFT        0x40000
-#define BLUE_RIGHT       0x80000
+#define BLUE_FORWARD     0x010000
+#define BLUE_BACKUP      0x020000
+#define BLUE_LEFT        0x040000
+#define BLUE_RIGHT       0x080000
+#define BLUE_CERIGHT     0x100000
+#define BLUE_CELEFT      0x110000
+
+
 #define BLUE_STOP	     0x00000
 
 #define WXC_OK       1
 #define WXC_ERROR    0
 
+#define CALC_DATA_COUNT		50
 
-
-
+typedef struct bodyexecInfo
+{
+	int run;
+	int right;
+	int ceBody;
+}stuBodyExecInfo;
 
 
 extern void input_blueTooth(unsigned char ch);
-extern int getBlueMacnStatus(void);
+extern stuBodyExecInfo getBlueMacnStatus(void);
 extern int initBlueSet(void);
 extern void input_blueTooth_cmd(char ch);
 extern void blueCmdSend(int cmd);
+extern short getClacData(short tData);
+extern int getBlueConnectStatus(void);
 
 
+
+extern stuFlashData g_flashData;
 
 
 
