@@ -108,7 +108,7 @@ void lightNumLed(int speed,int index)
 			speed = (speed/1000)%10;
 			break;		
 	}	
-	setNumLed(speed,index); 	
+	setNumLed(speed,index);
 }
 void initGpioForLedNum()
 {
@@ -201,11 +201,6 @@ void LED_NUM_thread_entry(void *parameter)
 		lightNumLed(showNum,numLedIndex);
 		numLedIndex ++;
 		rt_thread_delay(5);
-//		if(count ++ == 1000)
-//		{
-//			count = 0;
-//			rt_kprintf("1000\r\n");
-//		}
 	}
 	while(1)
 	{

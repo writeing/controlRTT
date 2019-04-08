@@ -3,76 +3,88 @@
 #include "dac.h"
 #include "app.h"
 #include "debugUsart.h"
-stuMacnControl g_stumach;
+#include "machOperation.h"
 
 int g_nowSpeed = 0;
-void _setFucode(char funcode);
 
-void _openMacn()
+static rt_device_t mach_device;
+stuMacnSendInfo g_stuMachInfo;
+
+static ErrorStatus s_machStatus = SUCCESS;
+
+
+/********************
+@brief init value and info
+@note 
+@param 
+@retval SUCCESS/ERROR
+********************/
+void machInit(rt_device_t mach_usart)
 {
-	g_stumach.FLag = MACN_BEGIN;
+	if (mach_usart != RT_NULL)
+	{
+		mach_device = mach_usart;				
+	}	
+	g_stuMachOpt.open(&g_stuMachInfo);
 }
-void _closeMacn()
+
+
+/********************
+@brief send buff for device 
+@note 
+@param 
+@retval 
+********************/
+void machBuffWrite(char *buff,int len)
 {
-	g_stumach.FLag = MACN_END;
+	if (mach_device != RT_NULL)
+	{
+		rt_device_write(mach_device, 0,buff,MACN_SEND_DATA_LEN);
+	}
 }
-char _checkMacn()
+/********************
+@brief rev buff for device 
+@note 
+@param 
+@retval
+********************/
+void machBuffRead(char *buff,int *len)
 {
-	return g_stumach.FLag;
+	int rx_length = 0;
+	if (mach_device != RT_NULL)
+	{
+		*len = rt_device_read(mach_device, 0, &(buff[0]),11);
+		
+	}
 }
-void initMacninfo(int FuncCode)
-{
-	_setFucode(FuncCode);
-	g_stumach.sendbuff[0] = MACH_HEAD;
-	g_stumach.sendbuff[1] = 0x01;
-	g_stumach.sendbuff[2] = 0x03;
-	g_stumach.sendbuff[3] = 0x02;
-	g_stumach.sendbuff[8] = MACH_TITLE;
-	setSendData(0,0);	
-	_openMacn();
-}
-void _setFucode(char funcode)
-{
-	g_stumach.FuncCode = funcode;	
-}
-void setSendData(char data1,char data2)
-{
-	g_stumach.sbuff[0] = data1;
-	g_stumach.sbuff[1] = data2;
-}
-int getMacnRunStatus()
-{
-	return g_stumach.FLag;
-}
-void _getCrcData()
-{
-	short crc = 0;
-	crc+=0x01;
-	crc+=g_stumach.sendbuff[1];
-	crc+= g_stumach.sendbuff[3];
-	crc+=g_stumach.sbuff[0];
-	crc+=g_stumach.sbuff[1];
-	g_stumach.crc = crc;
-}
-char *getSendData()
-{
-	_getCrcData();
-	g_stumach.sendbuff[4] = g_stumach.sbuff[0];
-	g_stumach.sendbuff[5] = g_stumach.sbuff[1];
-	g_stumach.sendbuff[6] = g_stumach.crc & 0x00FF;
-	g_stumach.sendbuff[7] = (g_stumach.crc & 0xFF00) >> 8;
-	return g_stumach.sendbuff;
-}
-void ansyMacnStatus(char sta)
-{
-	_closeMacn();
-	setSendData(0,0);
-	//根据sta 的值确定是过温，还是过压
-	
-	//发生异常之后，不做任何操作，并且停止工作
-}
-void checkMacnData(uint8_t ch)
+
+/********************
+@brief rev buff for device 
+@note 
+@param 
+@retval
+********************/
+void setMacnStatus(ErrorStatus sta)
 {	
+	s_machStatus = sta;
+}
+
+
+/********************
+@brief return macn run status
+@note void
+@param void
+@retval SUCCESS/ERROR
+********************/
+
+ErrorStatus checkMacnStatus(void)
+{	
+	return s_machStatus;
+}
+ErrorStatus ansyMacnData(uint8_t ch)
+{	
+	ErrorStatus rpy = SUCCESS;
+
 	static uint8_t macnFlag = MACH_HEAD;
 	static uint8_t macnStatus[4];
 	static uint8_t addCrc[2];	
@@ -80,102 +92,99 @@ void checkMacnData(uint8_t ch)
 	static int crc = 0;
 	switch(macnFlag)
 	{
-		case MACH_HEAD:
+		case MACH_SW_HEAD:
 			if(ch == MACH_HEAD)
 			{
-				macnFlag = MACH_ADDRESS;			
+				macnFlag = MACH_SW_ADDRESS;			
 			}			
 			break;
-		case MACH_ADDRESS:
+		case MACH_SW_ADDRESS:
 			if(ch == MACH_ADDRESS)
 			{
-				macnFlag = MACH_FUNCODE;			
+				macnFlag = MACH_SW_FUNCODE;			
 			}
 			else
 			{
-				macnFlag = MACH_HEAD;
+				macnFlag = MACH_SW_HEAD;
 			}
 			break;
-		case MACH_FUNCODE:
-			if(ch == 0x01)
+		case MACH_SW_FUNCODE:
+			if(ch == MACH_FUNCODE)
 			{
-				macnFlag = MACH_LEN;	
+				macnFlag = MACH_SW_LEN;	
 				crc += ch;
 			}
 			else
 			{
-				macnFlag = MACH_HEAD;
+				macnFlag = MACH_SW_HEAD;
 				crc = 0;
 			}
 			break;
-		case MACH_LEN:
-			if(ch == 0x04)
+		case MACH_SW_LEN:
+			if(ch == MACH_REV_LEN)
 			{
-				macnFlag = MACH_DATA;	
+				macnFlag = MACH_SW_DATA;	
 				crc += ch;
 			}
 			else
 			{
-				macnFlag = MACH_HEAD;
+				macnFlag = MACH_SW_HEAD;
 				crc = 0;
 			}
 			break;
-		case MACH_DATA:	
+		case MACH_SW_DATA:	
 			macnStatus[revCount++] = ch;
 			crc += ch;
-			if(revCount == 0x04)
+			if(revCount == MACH_REV_LEN)
 			{
-				macnFlag = MACH_CRC;
+				macnFlag = MACH_SW_CRC;
 				revCount = 0;
 			}
 			break;
-		case MACH_CRC:	
+		case MACH_SW_CRC:	
 			addCrc[revCount++] = ch;			
 			if(revCount == 2)
 			{
-				if(addCrc[0] == ((crc & 0xFF00) >> 8) && addCrc[0] == (crc &0x00FF))
+				if(addCrc[0] == ((crc & 0xFF00) >> 8) && addCrc[1] == (crc &0x00FF))
 				{
-					macnFlag = MACH_TITLE;
+					macnFlag = MACH_SW_TITLE;
 				
 				}
 				else
 				{
-					macnFlag = MACH_HEAD;
+					macnFlag = MACH_SW_HEAD;
 				}
 				revCount = 0;	
 				crc = 0;
 			}
 			break;
-		case MACH_TITLE:
-			if(ch == 0xAA)
+		case MACH_SW_TITLE:
+			if(ch == MACH_TITLE)
 			{
 				//rev data finsh and set status
 				//todo:macnStatus
 				if(macnStatus[0] > 0x01)
 				{
 					// error
-					ansyMacnStatus(macnStatus[1]);   //on the base of protocol 					
+					//ansyMacnStatus(macnStatus[1]);   //on the base of protocol 		
+					s_machStatus = ERROR;
+					rpy = ERROR;					
 				}
-				if(macnStatus[0] < 2 && _checkMacn() == MACN_END)
-				{
-					_openMacn();		//had ok			
+				else
+				{				
+					// mach run ok
+					g_nowSpeed = (int)((macnStatus[2] << 8) | macnStatus[3]);
+					sendSignalDataToPc(macnStatus[2],macnStatus[3]);
 				}				
-				sendSignalDataToPc(macnStatus[2],macnStatus[3]);
-				g_nowSpeed = (int)((macnStatus[2] << 8) | macnStatus[3]);
 			}
-			macnFlag = MACH_HEAD;
+			macnFlag = MACH_SW_HEAD;
 			break;
 	}
+	return rpy;
 }
 
-void checkMachStatus(rt_device_t machUsart)
-{
-	if(getMacnRunStatus() != MACN_BEGIN)
-	{
-		//send stop cmd
-		deviceStatus = DEVICE_END;
-	}	
-}
+
+
 void setRunjoytick(int machdire,int speed)
 {
 	static int count = 0;
@@ -274,36 +283,7 @@ void setMacbWorkStatus(stuBodyExecInfo status)
 	macnSpeed = (status.run) & 0x0FFFF;
 	setRunjoytick(macndire,macnSpeed);	
 #endif
-	
-	switch(macndire)
-	{
-		case MACN_FORWARD:
-			setSendData(1,macnSpeed);
-			break;
-		case MACN_BACKUP:
-			setSendData(1,(macnSpeed*-1));
-			break;
-		case MACN_LEFT:
-			//setSendData(0,0);
-			//setSendData(macndire,macnSpeed);
-			break;
-		case MACN_RIGHT:
-			//setSendData(0,0);
-			//setSendData(macndire,macnSpeed);
-			break;		
-		case MACN_STOP:
-			setSendData(0,0);
-			//setSendData(macndire,macnSpeed);
-			break;	
-		case MACN_CELEFT:
-			//setSendData(0,0);
-			//setSendData(macndire,macnSpeed);
-			break;	
-		case MACN_CERIGHT:
-			//setSendData(0,0);
-			//setSendData(macndire,macnSpeed);
-			break;				
-	}	
+
 }
 
 

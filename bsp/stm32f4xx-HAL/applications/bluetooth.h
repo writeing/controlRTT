@@ -37,13 +37,16 @@ typedef struct bodyexecInfo
 }stuBodyExecInfo;
 
 
-extern void input_blueTooth(unsigned char ch);
-extern stuBodyExecInfo getBlueMacnStatus(void);
-extern int initBlueSet(void);
-extern void input_blueTooth_cmd(char ch);
-extern void blueCmdSend(int cmd);
-extern short getClacData(short tData);
-extern int getBlueConnectStatus(void);
+extern void 			input_blueTooth(unsigned char ch);
+extern stuBodyExecInfo 	getBlueMacnStatus(void);
+extern int 				initBlueSet(void);
+extern void 			input_blueTooth_cmd(char ch);
+extern void 			blueCmdSend(int cmd);
+extern short 			getClacData(short tData);
+extern int 				getBlueConnectStatus(void);
+
+//new
+extern void 			initBlue(rt_device_t dev);
 
 
 

@@ -7,16 +7,19 @@
 	 
 #include "bluetooth.h"	 
 /*********************************define********************************/	 
-#define NONE			0
-#define MACH_HEAD		0x55	 
-#define MACH_ADDRESS 	0x01	 
-#define MACH_FUNCODE	0x02
-#define MACH_LEN		0x04
-#define MACH_DATA		0xA5
-#define MACH_CRC		0x06
-#define MACH_TITLE		0xAA
+
 #define MACH_SEND_FUNCODE	0x81
-	 
+
+#define MACH_SW_HEAD				0x01	 
+#define MACH_SW_ADDRESS 			0x02	 
+#define MACH_SW_FUNCODE				0x03
+#define MACH_SW_LEN					0x04
+#define MACH_SW_DATA				0x05
+#define MACH_SW_CRC					0x06
+#define MACH_SW_TITLE				0x07
+
+
+
 #define MACN_FORWARD     0x01
 #define MACN_BACKUP      0x02
 #define MACN_LEFT        0x04
@@ -30,31 +33,22 @@
 #define MACN_END		0x02
 	 
 	 
-#define MACN_SEND_DATA_LEN      9
+
 /*********************************value********************************/
 
-typedef struct Machcontrol
-{
-	char HEAD;
-	char address;
-	char FuncCode;
-	char dataLen;
-	char sbuff[2];
-	short crc;
-	char title;
-	char sendbuff[9];
-	char FLag;
-}stuMacnControl;		
 
 
 /*********************************func********************************/
-extern void setSendData(char data1,char data2);
-extern char *getSendData(void);
-extern void checkMacnData(unsigned char ch);
-extern void setMacbWorkStatus(stuBodyExecInfo status);
-extern int getMacnRunStatus(void);
-extern void initMacninfo(int FuncCode);
-extern void checkMachStatus(rt_device_t machUsart);
+
+extern ErrorStatus 	ansyMacnData(uint8_t ch);
+
+extern void 		machInit(rt_device_t mach_usart);
+
+extern ErrorStatus 	checkMacnStatus(void);
+
+extern void 		setMacnStatus(ErrorStatus sta);
+
+
 #ifdef __cplusplus
 }
 #endif

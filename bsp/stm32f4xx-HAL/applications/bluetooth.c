@@ -9,6 +9,7 @@
 extern rt_device_t Bluewrite_device;
 void _ansyBlueStatus(uint8_t * blueData);
 void _initBlueStatus(uint8_t * blueData);
+
 void input_blueTooth(uint8_t ch)
 {
 	static uint8_t blueFlag = BLUE_HEAD;
@@ -16,8 +17,6 @@ void input_blueTooth(uint8_t ch)
 	//static uint8_t addCrc[2];
 	static int revCount = 0;
 	static int funCode = 0;
-//	short crc = 0;
-	//rt_kprintf("%x\r\n",ch);
 	switch(blueFlag)
 	{
 		case BLUE_HEAD:
@@ -377,6 +376,28 @@ int getBlueConnectStatus()
 	else
 		return 0;
 }
+
+
+
+
+
+static rt_device_t device; 
+void initBlue(rt_device_t dev)
+{
+	device = dev;
+}
+
+void blueBuffWrite(char *buff,int len)
+{
+	rt_device_write(device,0,buff,len);
+}
+void blueBuffRead(char *buff,int *len)
+{
+	*len = rt_device_read(device, 0, buff,12);
+}
+
+
+
 
 static void _ansyBlueCmdData(char * revbuff,int len)
 {
