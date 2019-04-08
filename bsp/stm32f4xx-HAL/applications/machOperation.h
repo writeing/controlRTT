@@ -1,6 +1,6 @@
 #ifndef MACHOPERATION
 #define MACHOPERATION
-
+#include <board.h>
 
 
 /**************begin define parm***********************/
@@ -67,7 +67,7 @@ extern ErrorStatus 	MachIoctl(void);
 
 
 extern stuMachOperation g_stuMachOpt;
-
+extern stuMacnSendInfo g_stuMachInfo;
 
 
 

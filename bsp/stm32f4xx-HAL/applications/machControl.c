@@ -50,7 +50,6 @@ void machBuffWrite(char *buff,int len)
 ********************/
 void machBuffRead(char *buff,int *len)
 {
-	int rx_length = 0;
 	if (mach_device != RT_NULL)
 	{
 		*len = rt_device_read(mach_device, 0, &(buff[0]),11);

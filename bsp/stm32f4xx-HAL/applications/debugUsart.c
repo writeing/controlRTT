@@ -135,6 +135,7 @@ void debugAnsy(char ch)
 		char * ccid = strtok(s_revBuff,":");
 		ccid = strtok(NULL,":");
 		memcpy(g_flashData.blueDevice,ccid ,strlen(ccid));
+		rt_kprintf("ccid = %s\r\n",g_flashData.blueDevice);
 		sendSignalDataToPc(0,0);
 		memset(s_revBuff,0,REV_BUFF_COUNT);
 		s_index = 0;

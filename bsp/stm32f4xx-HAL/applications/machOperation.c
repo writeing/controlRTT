@@ -11,10 +11,10 @@
 
 stuMachOperation g_stuMachOpt = 
 {
-	.open = initMach;
-	.write = machSendBuffToDev;
-	.read = MachRevBuffForDev;
-	.ioctl = MachIoctl;
+	.open = initMach,
+	.write = machSendBuffToDev,
+	.read = MachRevBuffForDev,
+	.ioctl = MachIoctl,
 };
 
 
@@ -59,7 +59,7 @@ ErrorStatus machCombineSendBuff(stuMacnSendInfo *stumach,char direct,int speed,c
 	sendbuff[index ++ ] = crc & 0x00FF;
 	sendbuff[index ++ ] = (crc & 0xFF00) >> 8;
 	sendbuff[index ++ ] = stumach->title;	
-	return SUCCESS
+	return SUCCESS;
 }
 
 
@@ -88,7 +88,7 @@ ErrorStatus machSendBuffToDev(stuMacnSendInfo *stumach,char direct,int speed)
 ********************/
 ErrorStatus MachRevBuffForDev(char *revBuff,int *revlen)
 {	
-	assert_param(revBuff != RT_NULL)
+	assert_param(revBuff != RT_NULL);
 	machBuffRead(revBuff,revlen);
 	return SUCCESS;
 }

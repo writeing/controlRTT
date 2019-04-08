@@ -11,6 +11,7 @@
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F407VGTx</Device>
@@ -323,6 +324,7 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>0</uC99>
+            <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>0</v6Lang>
             <v6LangP>0</v6LangP>
@@ -423,6 +425,21 @@
               <FileName>macnApp.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\applications\macnApp.c</FilePath>
+            </File>
+            <File>
+              <FileName>ansyBlueData.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\ansyBlueData.c</FilePath>
+            </File>
+            <File>
+              <FileName>blueOperation.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\blueOperation.c</FilePath>
+            </File>
+            <File>
+              <FileName>machOperation.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\machOperation.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1019,5 +1036,11 @@
       </Groups>
     </Target>
   </Targets>
+
+  <RTE>
+    <apis/>
+    <components/>
+    <files/>
+  </RTE>
 
 </Project>

@@ -4,6 +4,7 @@
 #include "bluetooth.h"
 #include "machControl.h"
 #include "machOperation.h"
+#include "blueApp.h"
 
 rt_mq_t mach_rx_mq;
 
@@ -47,10 +48,10 @@ void app_macn_thread_entry(void *parameter)
 		if(result == RT_EOK)
 		{
 			//had rev rx msg
-			g_stuMachOpt.read(mach_rx_buffer,&rx_length);
+			g_stuMachOpt.read((char *)mach_rx_buffer,&rx_length);
 			for(int i = 0 ; i <rx_length ; i ++ )
 			{
-				if(checkMacnData(mach_rx_buffer[i]) == ERROR)		//ansy macn status and speed
+				if(ansyMacnData(mach_rx_buffer[i]) == ERROR)		//ansy macn status and speed
 				{
 					//mach is error
 					//close mach 
@@ -65,7 +66,7 @@ void app_macn_thread_entry(void *parameter)
 		if(checkMacnStatus() == SUCCESS)
 		{
 			//send data to device mach
-			g_stuMachOpt.write(g_stuMachInfo,direct,speed);
+			g_stuMachOpt.write(&g_stuMachInfo,direct,speed);
 		}		
 		//if mach had false  ,set deviceStatus is DEVICE_END
 		rt_thread_delay(50);

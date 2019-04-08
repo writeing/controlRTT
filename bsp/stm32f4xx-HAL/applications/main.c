@@ -19,7 +19,8 @@
 #include "stdlib.h"
 #include "string.h"
 #include "flash.h"
-
+#include "bluetooth.h"
+#include "blueApp.h"
 #define FLASH_DATA_ADDRESS                  0x0801A000
 
 stuFlashData g_flashData;
@@ -71,6 +72,13 @@ int main(void)
 	
     /* user app entry */
 //	rt_err_t result;
+
+	//后面放到总的初始化地方，在这个线程启动之后的地方	
+	rt_thread_delay(300);
+	beginSendBlueCmd();
+	initBlueSet();		  //
+	beginRevBlueData(); 
+
 	while(1)
 	{
 		rt_thread_delay(300);

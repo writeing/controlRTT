@@ -1,6 +1,7 @@
 #ifndef __BLUETOOTH__
 #define __BLUETOOTH__
 #include "app.h"
+#include <board.h>
 #define NONE			0
 #define BLUE_HEAD		0x55
 #define BLUE_FUNCODE	0x03
@@ -51,7 +52,7 @@ extern void 			initBlue(rt_device_t dev);
 
 
 extern stuFlashData g_flashData;
-
+extern stuBodyExecInfo gBodyExecInfo;
 
 
 

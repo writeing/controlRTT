@@ -1,6 +1,6 @@
 #ifndef BLUEOPERATITON
 #define BLUEOPERATITON
-
+#include <board.h>
 /**************begin define parm***********************/
 
 

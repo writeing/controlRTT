@@ -11,10 +11,10 @@
 
 stublueOperation g_stublueOpt = 
 {
-	.open = initblue;
-	.write = blueSendBuffToDev;
-	.read = blueRevBuffForDev;
-	.ioctl = blueIoctl;
+	.open = initblue,
+	.write = blueSendBuffToDev,
+	.read = blueRevBuffForDev,
+	.ioctl = blueIoctl,
 };
 
 
@@ -52,7 +52,7 @@ ErrorStatus blueSendBuffToDev(char *buff,int len)
 ********************/
 ErrorStatus blueRevBuffForDev(char *revBuff,int *revlen)
 {	
-	assert_param(revBuff != RT_NULL)
+	assert_param(revBuff != RT_NULL);
 	blueBuffRead(revBuff,revlen);
 	return SUCCESS;
 }

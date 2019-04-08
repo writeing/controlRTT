@@ -48,7 +48,7 @@ extern ErrorStatus 	checkMacnStatus(void);
 
 extern void 		setMacnStatus(ErrorStatus sta);
 
-
+extern void 		setMacbWorkStatus(stuBodyExecInfo status);
 #ifdef __cplusplus
 }
 #endif
