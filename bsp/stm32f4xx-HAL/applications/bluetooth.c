@@ -3,7 +3,6 @@
 #include "math.h"
 #include <drivers/pin.h>
 #include "string.h"
-#include "easyflash.h"
 #include "stdlib.h"
 #include "stdio.h"
 #include "app.h"

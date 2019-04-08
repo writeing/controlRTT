@@ -42,7 +42,7 @@
 //***********begin user define func
 extern void rt_app_application_init(void);
 extern void rt_led_num_application_init(void);
-extern void lightNumLed(int speed);
+extern void lightNumLed(int speed,int index);
 extern int getSetShowNum(int showNum);
 extern void initExternFlash(void);		//in main thread   init extern flash
 

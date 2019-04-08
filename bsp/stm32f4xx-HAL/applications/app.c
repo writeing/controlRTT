@@ -19,44 +19,70 @@ void rt_app_application_init()
 	rt_BlueApp_application_init();
 }
 /***************************************LED NUM****************************************/
+
 uint8_t SEG_A_List[16] = {0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x79,0x71};
 
 void setNumLed(int num,int index)
 {		
-	switch(index)
-	{
-		case 1:
-			rt_pin_write(39,0);
-			rt_pin_write(40,0);
-			rt_pin_write(41,1);			
-			break;
-		case 2:	
-			rt_pin_write(39,0);
-			rt_pin_write(40,1);
-			rt_pin_write(41,0);						
-			break;
-		case 3:
-			rt_pin_write(39,1);
-			rt_pin_write(40,0);
-			rt_pin_write(41,0);						
-			break;
-		default:return;
-	}	
-	for(int i = 0 ; i < 8 ; i ++ )
+		for(int i = 0 ; i < 8 ; i ++ )
 	{
 		if((SEG_A_List[num] & (0x01 << i)) > 0)
 		{
-			HAL_GPIO_WritePin(GPIOE,(0x01 << i),GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOB,(0x01 << i),GPIO_PIN_SET);
 		}
 		else
 		{
-			HAL_GPIO_WritePin(GPIOE,(0x01 << i),GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOB,(0x01 << i),GPIO_PIN_RESET);
 		}
-	}	
+	}
+	switch(index)
+	{
+		case 4:
+			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_4,GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_5,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_6,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_7,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_SET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);
+			break;
+		case 3:	
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_4,GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_5,GPIO_PIN_SET);
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_6,GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_7,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);						
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_SET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);		
+			break;
+		case 2:
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_4,GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_5,GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_6,GPIO_PIN_SET);
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_7,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_SET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);
+		break;
+		case 1:
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_4,GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_5,GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_6,GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_7,GPIO_PIN_SET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_SET);
+			break;
+	}
+
 }
 int getSetShowNum(int showNum)
 {
-	static int s_showNum = 555;
+	static int s_showNum = 1234;
 	if(showNum == RT_NULL)
 	{
 		return s_showNum;
@@ -64,17 +90,25 @@ int getSetShowNum(int showNum)
 	s_showNum = showNum;
 	return showNum;	
 }
-MSH_CMD_EXPORT(getSetShowNum,set led num in func);
 
-void lightNumLed(int speed)
+void lightNumLed(int speed,int index)
 {
-	int bai = (int)(speed /100);
-	int shi = (int)((speed - bai*100)/10);
-	int ge = speed % 10;
-	//printf("num = %d\r\n",ge);
-    setNumLed(bai,1); 
-    setNumLed(shi,2);
-    setNumLed(ge,3);
+	switch(index)
+	{
+		case 1:
+			speed = speed %10;
+			break;
+		case 2:
+			speed = (speed/10)%10;
+			break;
+		case 3:
+			speed = (speed/100)%10;
+			break;
+		case 4:
+			speed = (speed/1000)%10;
+			break;		
+	}	
+	setNumLed(speed,index); 	
 }
 void initGpioForLedNum()
 {
@@ -90,19 +124,37 @@ void initGpioForLedNum()
 		rt_pin_mode(17,PIN_MODE_INPUT);
 		rt_pin_mode(18,PIN_MODE_INPUT);
 		
-		//numled
-		rt_pin_mode(39,PIN_MODE_OUTPUT);
-		rt_pin_mode(40,PIN_MODE_OUTPUT);
-		rt_pin_mode(41,PIN_MODE_OUTPUT);
+		//numled com define 
+		 //com1-4
+ 		rt_pin_mode(81,PIN_MODE_OUTPUT);
+		rt_pin_mode(82,PIN_MODE_OUTPUT);
+		rt_pin_mode(83,PIN_MODE_OUTPUT);
+		rt_pin_mode(84,PIN_MODE_OUTPUT);
+		//com5~8
+		rt_pin_mode(85,PIN_MODE_OUTPUT);
+		rt_pin_mode(86,PIN_MODE_OUTPUT);
+		rt_pin_mode(87,PIN_MODE_OUTPUT);
+		rt_pin_mode(88,PIN_MODE_OUTPUT);
+		//9~12
+		rt_pin_mode(55,PIN_MODE_OUTPUT);
+		rt_pin_mode(56,PIN_MODE_OUTPUT);
+		rt_pin_mode(57,PIN_MODE_OUTPUT);
+		rt_pin_mode(58,PIN_MODE_OUTPUT);
+		//all switch
+		rt_pin_mode(59,PIN_MODE_OUTPUT);
+
+		//lednum data
+		rt_pin_mode(35,PIN_MODE_OUTPUT);
+		rt_pin_mode(36,PIN_MODE_OUTPUT);
+		rt_pin_mode(37,PIN_MODE_OUTPUT);
+		rt_pin_mode(59,PIN_MODE_OUTPUT);
+		rt_pin_mode(90,PIN_MODE_OUTPUT);
+		rt_pin_mode(91,PIN_MODE_OUTPUT);
+		rt_pin_mode(92,PIN_MODE_OUTPUT);
+		rt_pin_mode(93,PIN_MODE_OUTPUT);
+			
+			
 		
-		rt_pin_mode(97,PIN_MODE_OUTPUT);
-		rt_pin_mode(98,PIN_MODE_OUTPUT);
-		rt_pin_mode(1,PIN_MODE_OUTPUT);
-		rt_pin_mode(2,PIN_MODE_OUTPUT);
-		rt_pin_mode(3,PIN_MODE_OUTPUT);
-		rt_pin_mode(4,PIN_MODE_OUTPUT);
-		rt_pin_mode(5,PIN_MODE_OUTPUT);
-		rt_pin_mode(38,PIN_MODE_OUTPUT);
 		
 		//blue
 		rt_pin_mode(51,PIN_MODE_OUTPUT);  //PB12
@@ -117,7 +169,7 @@ int getSconKey()
 	{
 		if(HAL_GPIO_ReadPin(GPIOC,KEY_1_Pin << i) == GPIO_PIN_RESET)
 		{
-			HAL_Delay(20);
+			rt_thread_mdelay(20);
 			while(HAL_GPIO_ReadPin(GPIOC,KEY_1_Pin << i) == GPIO_PIN_RESET);
 			return i;
 		}
@@ -130,13 +182,31 @@ rt_mutex_t ledMutex;
 static void timeout1(void* parameter)
 {
 	int showNum = getSetShowNum(RT_NULL);
-	lightNumLed(showNum);
+	//lightNumLed(showNum);
 }
 
 void LED_NUM_thread_entry(void *parameter)
 {
 	int showNum = getSetShowNum(RT_NULL);
 	rt_mutex_release(ledMutex);
+	static char numLedIndex = 1;
+	static int count = 0;
+	while(1)
+	{
+	  showNum = getSetShowNum(RT_NULL);		
+		numLedIndex = numLedIndex % 5;
+		if(numLedIndex == 0)
+			numLedIndex  = 1;
+
+		lightNumLed(showNum,numLedIndex);
+		numLedIndex ++;
+		rt_thread_delay(5);
+//		if(count ++ == 1000)
+//		{
+//			count = 0;
+//			rt_kprintf("1000\r\n");
+//		}
+	}
 	while(1)
 	{
 		// get blue data ,,in init blue data
@@ -149,20 +219,20 @@ void LED_NUM_thread_entry(void *parameter)
 		}
 		rt_thread_delay(50);
 		rt_kprintf("%d\r\n",getBlueConnectStatus());
-        if(getBlueConnectStatus() == 0)
-        {			
-			rt_kprintf("blue connect false reconncet %d\r\n",getBlueConnectStatus());
-        	deviceStatus = DEVICE_END;	
-			while(1)
-			{
-				if(getBlueConnectStatus() == 1)
+		if(getBlueConnectStatus() == 0)
+		{			
+				rt_kprintf("blue connect false reconncet %d\r\n",getBlueConnectStatus());
+				deviceStatus = DEVICE_END;	
+				while(1)
 				{
-					deviceStatus = DEVICE_BEGIN;
-					break;
+					if(getBlueConnectStatus() == 1)
+					{
+						deviceStatus = DEVICE_BEGIN;
+						break;
+					}
+					rt_thread_delay(1000);				
 				}
-				rt_thread_delay(1000);				
-			}
-        }		
+		}		
 	}
 }
 
@@ -170,24 +240,25 @@ void rt_led_num_application_init()
 {	
 	ledMutex = rt_mutex_create("lednum", RT_IPC_FLAG_PRIO);
 	initGpioForLedNum();
-    if (ledMutex == RT_NULL)
-    {
-		rt_kprintf("ledMutex init false\r\n");
-		return ;
-    }
+	rt_pin_write(59,1); // open all switch 
+	if (ledMutex == RT_NULL)
+	{
+	rt_kprintf("ledMutex init false\r\n");
+	return ;
+	}
 	rt_thread_t tid;
 	tid = rt_thread_create("lednum", LED_NUM_thread_entry, RT_NULL,
-                           RT_LED_NUM_THREAD_STACK_SIZE, RT_LED_NUM_THREAD_PRIORITY, 20);
+                           RT_LED_NUM_THREAD_STACK_SIZE, RT_LED_NUM_THREAD_PRIORITY, 1);
     RT_ASSERT(tid != RT_NULL);
 	rt_thread_startup(tid);
 		
-	rt_timer_init(&timer_ledNum, "timer1",  /* ?????? timer1 */
-                    timeout1, /* ?????????? */
-                    RT_NULL, /* ????????? */
-                    10, /* ????,?OS Tick???,?10?OS Tick */
-                    RT_TIMER_FLAG_PERIODIC); /* ?????? */
-	
-	 rt_timer_start(&timer_ledNum);
+//	rt_timer_init(&timer_ledNum, "timer1",  /* ?????? timer1 */
+//                    timeout1, /* ?????????? */
+//                    RT_NULL, /* ????????? */
+//                    10, /* ????,?OS Tick???,?10?OS Tick */
+//                    RT_TIMER_FLAG_PERIODIC); /* ?????? */
+//	
+//	 rt_timer_start(&timer_ledNum);
 }
 /***************************************LED NUM****************************************/
 
