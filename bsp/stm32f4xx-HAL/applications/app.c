@@ -49,11 +49,13 @@ void setNumLed(int num,int index,int mode)
 			HAL_GPIO_WritePin(GPIOB,(0x01 << i),GPIO_PIN_RESET);
 		}
 	}
+	
 	for(int i= 0 ; i < 4 ; i ++)
 	{
 		rt_pin_write(pinBuff[i],PIN_LOW);
 	}
 	rt_pin_write(pinBuff[index -1 ],PIN_HIGH);
+	rt_thread_delay(2);	
 }
 /********************
 @brief set/or get speed value
@@ -173,12 +175,11 @@ int getSconKey()
 	//foreach three key
 	for(int i = 0 ; i < 3 ; i ++)
 	{
-		if(rt_pin_read(DEVICE_KEY + i) == PIN_LOW)
+		if(rt_pin_read(DEVICE_KEY + i) == PIN_HIGH)
 		{
 			rt_thread_mdelay(5);
-			while(rt_pin_read(DEVICE_KEY + i) == PIN_LOW);
-			return i;
-			
+			while(rt_pin_read(DEVICE_KEY + i) == PIN_HIGH);
+			return i;			
 		}
 	}
 	return -1;
@@ -268,15 +269,13 @@ void LED_NUM_thread_entry(void *parameter)
 			//speed show
 		ledSpeedShow();
 			//xxxx show
-		ledxxxxShow();
+		//ledxxxxShow();
 			//yyyy show
 		ledyyyyShow();
 		//get key value
-        rpy = getSconKey();
+    //rpy = getSconKey();
         //execute key event
-		execKeyEvent(rpy);
-        //delay 
-		rt_thread_delay(3);
+		//execKeyEvent(rpy);        
 		
 	}
 }

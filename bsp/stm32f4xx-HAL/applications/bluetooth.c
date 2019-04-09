@@ -28,7 +28,7 @@ void _set_Blue_At(int st)
 void sendBuffer(uint8_t *buff)
 {	
 	rt_device_write(device,0,buff,strlen((char *)buff));
-	//rt_kprintf("%s",buff);
+	rt_kprintf("%s",buff);
 }
 void _sendCmdToBlue(uint8_t *buff,int len)
 {	
@@ -114,11 +114,6 @@ int getBlueConnectStatus()
 		return 0;
 }
 
-
-
-
-
-
 void initBlue(rt_device_t dev)
 {
 	device = dev;
@@ -138,7 +133,7 @@ void blueBuffRead(char *buff,int *len)
 
 static void _ansyBlueCmdData(char * revbuff,int len)
 {
-	rt_kprintf("blue rev :%S,%d\r\n",revbuff,len);
+	rt_kprintf("%s",revbuff);
 }
 void input_blueTooth_cmd(char ch)
 {
@@ -148,8 +143,10 @@ void input_blueTooth_cmd(char ch)
 	if(ch == 0xAA)
 	{
 		//had end rev data
+		s_buff[s_index] = '\0';
 		_ansyBlueCmdData(s_buff,s_index);
-		s_index = 0;
+		memset(s_buff,0,s_index);
+		s_index = 0;		
 	}
 }
 

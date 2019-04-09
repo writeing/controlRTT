@@ -129,12 +129,13 @@ void debugAnsy(char ch)
 		memset(s_revBuff,0,REV_BUFF_COUNT);
 		s_index = 0;
 	}
-	if(strstr(s_revBuff,"ccid")!= 0)
+	if(strstr(s_revBuff,"ccid")!= 0 && ch == ';')
 	{
-		char * ccid = strtok(s_revBuff,":");
-		ccid = strtok(NULL,":");
-		memcpy(g_flashData.blueDevice,ccid ,strlen(ccid));
-		rt_kprintf("ccid = %s\r\n",g_flashData.blueDevice);
+		char ccid[20] = {0};		
+		int len = sscanf(s_revBuff,"ccid%s",ccid);
+		memcpy(g_flashData.blueDevice,ccid ,rt_strlen(ccid) -1);
+		g_flashData.blueDevice[rt_strlen(ccid) - 1] = 0;
+		//rt_kprintf("ccid = %s\r\n",g_flashData.blueDevice);
 		sendSignalDataToPc(0,0);
 		memset(s_revBuff,0,REV_BUFF_COUNT);
 		s_index = 0;

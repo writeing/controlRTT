@@ -21,7 +21,8 @@ void getBlueCmdData(void)
 	rt_err_t result;
 	int readLen = 1;
 	struct rx_msg msg;
-	if(blue_data_type == 1)
+	char blueRevBuff[50];
+	if(blue_data_type == BLUE_CMD_MODE)
 	{
 		//cmd
 		//rt_kprintf("blue cmd mode;");
@@ -30,21 +31,18 @@ void getBlueCmdData(void)
 		{
 			//rt_kprintf("blue had rev cmd data;%d",msg.size);
 			rt_thread_delay(50);
-			rt_uint32_t rx_length = 0;
 			rt_tick_t starttime = rt_tick_get();
-			char ch;
-			while(rx_length != msg.size && rt_tick_get() - starttime < 3*1000)
-			{				
-				g_stublueOpt.read(&(ch),&readLen);
-				rx_length ++;
-				input_blueTooth_cmd(ch);
-				rt_thread_delay(10);
-				//rt_kprintf("%c",ch);
-			}
-			if(rx_length != 0)
+			do
 			{
-				input_blueTooth_cmd(0xAA);
-			}
+				g_stublueOpt.read(blueRevBuff,&readLen);
+				for(int i = 0 ; i < readLen ; i ++)
+				{
+					input_blueTooth_cmd(blueRevBuff[i]);
+				}
+				memset(blueRevBuff,0,50);
+				rt_thread_delay(1);
+			}while(readLen == 0);
+			input_blueTooth_cmd(0xAA);
 		}
 	}//rev  blue data      
 }
@@ -53,7 +51,7 @@ static rt_err_t blue_uart_input(rt_device_t dev, rt_size_t size)
     struct rx_msg bluemsg;
     bluemsg.dev = dev;
     bluemsg.size = size;
-	if(blue_data_type == 1)
+	if(blue_data_type == BLUE_CMD_MODE)
 	{
 		//cmd
 		rt_mq_send(blue_rx_mq, &bluemsg, sizeof(struct rx_msg));
@@ -97,13 +95,13 @@ void app_thread_entry(void *parameter)
 	struct rx_msg msg;
 	rt_device_t device;
 	rt_err_t result = RT_EOK;
-    device= rt_device_find("uart3");// blue
-    if (device != RT_NULL)
-    {		
-        rt_device_set_rx_indicate(device, blue_uart_input);
-        rt_device_open(device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);  //
-		rt_kprintf("usart3 init true\r\n");
-    }
+	device= rt_device_find("uart3");// blue
+	if (device != RT_NULL)
+	{		
+			rt_device_set_rx_indicate(device, blue_uart_input);
+			rt_device_open(device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);  //
+			rt_kprintf("usart3 init true\r\n");
+	}
 	else
 	{
 		rt_kprintf("usart3 init false\r\n");
@@ -113,15 +111,15 @@ void app_thread_entry(void *parameter)
 	initBlue(device);
 	while(1)
 	{
-		//rev blue data
-		result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg),10);  		
-		if(result != RT_EOK)
-		{
-			rt_thread_delay(3);
-			continue;
-		}		
 		if(getBlueMode() == BLUE_DATA_MODE)
 		{
+			//rev blue data
+			result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg),10);  		
+			if(result != RT_EOK)
+			{
+				rt_thread_delay(3);
+				continue;
+			}		
 			//read blue data
 			g_stublueOpt.read((char *)uart_rx_buffer,&rx_length);
 			//ansy blue data

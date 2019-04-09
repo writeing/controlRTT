@@ -87,7 +87,7 @@ int main(void)
 	{
 		rt_thread_delay(50);
 		//foreach get adc data
-		AdcGetValue(&channel1,&channel2);
+		//AdcGetValue(&channel1,&channel2);
 		//exec adc value 
 		//send data to blue 		
 	}	
