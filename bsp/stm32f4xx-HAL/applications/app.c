@@ -7,11 +7,6 @@
 #include "bluetooth.h"
 #include "debugUsart.h"
 static struct rt_timer timer_ledNum;
-// 串口接收数据信号量
-rt_mq_t debug_rx_mq;
-uint8_t deviceStatus = DEVICE_BEGIN;
-
-
 void rt_app_application_init()
 {
 	//blue rev and init
@@ -22,9 +17,28 @@ void rt_app_application_init()
 
 uint8_t SEG_A_List[16] = {0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x79,0x71};
 
-void setNumLed(int num,int index)
-{		
-		for(int i = 0 ; i < 8 ; i ++ )
+static char ledSpeedBuff[4] = {81,82,83,84};
+
+static char ledxxxxBuff[4] =  {85,86,87,88};
+static char ledyyyyBuff[4] =  {55,56,57,58};
+
+/********************
+@brief show speed in num led 
+@note void
+@param num: speed.index:show num index
+@retval 
+********************/
+
+void setNumLed(int num,int index,int mode)
+{	
+	char *pinBuff;
+	if(mode == SHOW_SPEED_MODE)
+		pinBuff = ledSpeedBuff;
+	if(mode == SHOW_XXXX_MODE)
+		pinBuff = ledxxxxBuff;
+	if(mode == SHOW_YYYY_MODE)
+		pinBuff = ledyyyyBuff;		
+	for(int i = 0 ; i < 8 ; i ++ )
 	{
 		if((SEG_A_List[num] & (0x01 << i)) > 0)
 		{
@@ -35,51 +49,19 @@ void setNumLed(int num,int index)
 			HAL_GPIO_WritePin(GPIOB,(0x01 << i),GPIO_PIN_RESET);
 		}
 	}
-	switch(index)
+	for(int i= 0 ; i < 4 ; i ++)
 	{
-		case 4:
-			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_4,GPIO_PIN_SET);
-			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_5,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_6,GPIO_PIN_RESET);
-			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_7,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_SET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);
-			break;
-		case 3:	
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_4,GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_5,GPIO_PIN_SET);
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_6,GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_7,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);						
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_SET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);		
-			break;
-		case 2:
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_4,GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_5,GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_6,GPIO_PIN_SET);
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_7,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_SET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_RESET);
-		break;
-		case 1:
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_4,GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_5,GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_6,GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(GPIOD,GPIO_PIN_7,GPIO_PIN_SET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_0,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_1,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
-//			HAL_GPIO_WritePin(GPIOD,GPIO_PIN_3,GPIO_PIN_SET);
-			break;
+		rt_pin_write(pinBuff[i],PIN_LOW);
 	}
-
+	rt_pin_write(pinBuff[index -1 ],PIN_HIGH);
 }
+/********************
+@brief set/or get speed value
+@note void
+@param 
+@retval 
+********************/
+
 int getSetShowNum(int showNum)
 {
 	static int s_showNum = 1234;
@@ -90,27 +72,40 @@ int getSetShowNum(int showNum)
 	s_showNum = showNum;
 	return showNum;	
 }
-
-void lightNumLed(int speed,int index)
+/********************
+@brief set data 4 value 
+@note void
+@param 
+@retval 
+********************/
+void lightNumLed(int data,int index,int mode)
 {
 	switch(index)
 	{
 		case 1:
-			speed = speed %10;
+			data = data %10;
 			break;
 		case 2:
-			speed = (speed/10)%10;
+			data = (data/10)%10;
 			break;
 		case 3:
-			speed = (speed/100)%10;
+			data = (data/100)%10;
 			break;
 		case 4:
-			speed = (speed/1000)%10;
+			data = (data/1000)%10;
 			break;		
-	}	
-	setNumLed(speed,index);
+	}
+	setNumLed(data,index,mode);
 }
-void initGpioForLedNum()
+
+
+/********************
+@brief init gpio ,all
+@note void
+@param 
+@retval 
+********************/
+void initGpioForAllDevice()
 {
 	rt_device_t device;
 	//"pin"		
@@ -119,10 +114,9 @@ void initGpioForLedNum()
     if (device!= RT_NULL)
     {	   
 		//scan key
-		rt_pin_mode(15,PIN_MODE_INPUT);
-		rt_pin_mode(16,PIN_MODE_INPUT);
-		rt_pin_mode(17,PIN_MODE_INPUT);
-		rt_pin_mode(18,PIN_MODE_INPUT);
+		rt_pin_mode(39,PIN_MODE_INPUT);
+		rt_pin_mode(40,PIN_MODE_INPUT);
+		rt_pin_mode(41,PIN_MODE_INPUT);
 		
 		//numled com define 
 		 //com1-4
@@ -151,27 +145,40 @@ void initGpioForLedNum()
 		rt_pin_mode(90,PIN_MODE_OUTPUT);
 		rt_pin_mode(91,PIN_MODE_OUTPUT);
 		rt_pin_mode(92,PIN_MODE_OUTPUT);
-		rt_pin_mode(93,PIN_MODE_OUTPUT);
-			
-			
-		
+		rt_pin_mode(93,PIN_MODE_OUTPUT);								
 		
 		//blue
 		rt_pin_mode(51,PIN_MODE_OUTPUT);  //PB12
 		rt_pin_mode(52,PIN_MODE_OUTPUT);  //PB13
 		rt_pin_mode(53,PIN_MODE_INPUT);   //PB14
+
+		//buzz
+		rt_pin_mode(95,PIN_MODE_OUTPUT);
+		//red rev
+		rt_pin_mode(96,PIN_MODE_INPUT);  
+		//urgen lock
+		rt_pin_mode(5,PIN_MODE_INPUT);   	
     }
 }
-	
+
+
+/********************
+@brief get key value
+@note void
+@param 
+@retval 
+********************/	
 int getSconKey()
 {
-	for(int i = 0 ; i < 4 ; i ++)
+	//foreach three key
+	for(int i = 0 ; i < 3 ; i ++)
 	{
-		if(HAL_GPIO_ReadPin(GPIOC,KEY_1_Pin << i) == GPIO_PIN_RESET)
+		if(rt_pin_read(DEVICE_KEY + i) == PIN_LOW)
 		{
-			rt_thread_mdelay(20);
-			while(HAL_GPIO_ReadPin(GPIOC,KEY_1_Pin << i) == GPIO_PIN_RESET);
+			rt_thread_mdelay(5);
+			while(rt_pin_read(DEVICE_KEY + i) == PIN_LOW);
 			return i;
+			
 		}
 	}
 	return -1;
@@ -185,61 +192,105 @@ static void timeout1(void* parameter)
 	//lightNumLed(showNum);
 }
 
+
+
+
+/********************
+@brief show speed data
+@note void
+@param 
+@retval 
+********************/	
+void ledSpeedShow(void)
+{
+	int showNum = getSetShowNum(RT_NULL);	
+	for(int i = 1 ; i <= 4 ; i ++)
+	{
+		lightNumLed(showNum,i,SHOW_SPEED_MODE);
+	}
+}
+/********************
+@brief show xxxx data
+@note void
+@param 
+@retval 
+********************/
+void ledxxxxShow(void)
+{
+	int showNum = 1234;//getSetShowNum(RT_NULL);	
+	for(int i = 1 ; i <= 4 ; i ++)
+	{
+		lightNumLed(showNum,i,SHOW_XXXX_MODE);
+	}
+}
+/********************
+@brief show yyyy data
+@note void
+@param 
+@retval 
+********************/
+void ledyyyyShow(void)
+{
+	int showNum = 1234;//getSetShowNum(RT_NULL);	
+	for(int i = 1 ; i <= 4 ; i ++)
+	{
+		lightNumLed(showNum,i,SHOW_YYYY_MODE);
+	}
+}
+/********************
+@brief execture key event
+@note void
+@param key is which key being touch
+@retval 
+********************/
+
+void execKeyEvent(int key)
+{
+	if(key == KEY_1)
+	{
+		
+	}
+	if(key == KEY_2)
+	{
+		
+	}
+	if(key == KEY_3)
+	{
+		
+	}
+}
 void LED_NUM_thread_entry(void *parameter)
 {
-	int showNum = getSetShowNum(RT_NULL);
-	rt_mutex_release(ledMutex);
-	static char numLedIndex = 1;
-	static int count = 0;
+	int rpy = 0;
 	while(1)
 	{
-	  showNum = getSetShowNum(RT_NULL);		
-		numLedIndex = numLedIndex % 5;
-		if(numLedIndex == 0)
-			numLedIndex  = 1;
-
-		lightNumLed(showNum,numLedIndex);
-		numLedIndex ++;
-		rt_thread_delay(5);
-	}
-	while(1)
-	{
-		// get blue data ,,in init blue data
-		getBlueCmdData();
-		//get switch key to control device
-        int rpy = getSconKey();			
-		if(rpy == MODE_KEY)
-		{
-			deviceStatus = DEVICE_END;
-		}
-		rt_thread_delay(50);
-		rt_kprintf("%d\r\n",getBlueConnectStatus());
-		if(getBlueConnectStatus() == 0)
-		{			
-				rt_kprintf("blue connect false reconncet %d\r\n",getBlueConnectStatus());
-				deviceStatus = DEVICE_END;	
-				while(1)
-				{
-					if(getBlueConnectStatus() == 1)
-					{
-						deviceStatus = DEVICE_BEGIN;
-						break;
-					}
-					rt_thread_delay(1000);				
-				}
-		}		
+		//show led num
+			//speed show
+		ledSpeedShow();
+			//xxxx show
+		ledxxxxShow();
+			//yyyy show
+		ledyyyyShow();
+		//get key value
+        rpy = getSconKey();
+        //execute key event
+		execKeyEvent(rpy);
+        //delay 
+		rt_thread_delay(3);
+		
 	}
 }
 
 void rt_led_num_application_init()
 {	
 	ledMutex = rt_mutex_create("lednum", RT_IPC_FLAG_PRIO);
-	initGpioForLedNum();
-	rt_pin_write(59,1); // open all switch 
+	//init gpio for all device
+	initGpioForAllDevice();
+	rt_pin_write(59,PIN_HIGH); // open all switch 
 	if (ledMutex == RT_NULL)
 	{
-	rt_kprintf("ledMutex init false\r\n");
-	return ;
+		rt_kprintf("ledMutex init false\r\n");
+		return ;
 	}
 	rt_thread_t tid;
 	tid = rt_thread_create("lednum", LED_NUM_thread_entry, RT_NULL,

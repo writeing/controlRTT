@@ -4,7 +4,7 @@
 #include "app.h"
 #include "debugUsart.h"
 #include "machOperation.h"
-
+#include "HAL_pwm.h"
 int g_nowSpeed = 0;
 
 static rt_device_t mach_device;
@@ -146,11 +146,12 @@ ErrorStatus ansyMacnData(uint8_t ch)
 			{
 				if(addCrc[0] == ((crc & 0xFF00) >> 8) && addCrc[1] == (crc &0x00FF))
 				{
-					macnFlag = MACH_SW_TITLE;
-				
+					//crc is ok
+					macnFlag = MACH_SW_TITLE;				
 				}
 				else
 				{
+					//cmd rev error
 					macnFlag = MACH_SW_HEAD;
 				}
 				revCount = 0;	
@@ -200,12 +201,14 @@ void setRunjoytick(int machdire,int speed)
 	{
 		speed = 2048;
 		//end
-		HAL_DAC_SetValue(&hdac,DAC_CHANNEL_1,DAC_ALIGN_12B_R,speed);
-		HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
+		user_pwm_setvalue(speed,LSTICK_V);
+//		HAL_DAC_SetValue(&hdac,DAC_CHANNEL_1,DAC_ALIGN_12B_R,speed);
+//		HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
 		return;
 	}
-	HAL_DAC_SetValue(&hdac,DAC_CHANNEL_1,DAC_ALIGN_12B_R,speed);
-	HAL_DAC_Start(&hdac,DAC_CHANNEL_1);	
+	user_pwm_setvalue(speed,LSTICK_V);
+//	HAL_DAC_SetValue(&hdac,DAC_CHANNEL_1,DAC_ALIGN_12B_R,speed);
+//	HAL_DAC_Start(&hdac,DAC_CHANNEL_1);	
 	if((++count)% DEVICE_BLUE_PRINT_DATA_INTERVAL == 0)
 	{
 		rt_kprintf("run macndire = %d,speed = %d\r\n",machdire,speed);
@@ -231,8 +234,9 @@ void setRightjoytick(int machdire,int speed)
 		rt_kprintf("right macndire = %d,speed = %d\r\n",machdire,speed);
 		count = 0;
 	}
-	HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,speed);
-	HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+	user_pwm_setvalue(speed,LSTICK_H);
+//	HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,speed);
+//	HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
 	return;
 	
 }
@@ -253,8 +257,8 @@ void setCebodyjoytick(int machdire,int speed)
 		rt_kprintf("cebody macndire = %d,speed = %d\r\n",machdire,speed);
 		count = 0;
 	}
-	HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,speed);
-	HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+	user_pwm_setvalue(speed,LSTICK_H);
+
 	return;
 	
 }

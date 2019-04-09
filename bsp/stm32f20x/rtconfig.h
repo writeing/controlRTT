@@ -11,12 +11,11 @@
 #define RT_THREAD_PRIORITY_32
 #define RT_THREAD_PRIORITY_MAX 32
 #define RT_TICK_PER_SECOND 100
-#define RT_DEBUG
 #define RT_USING_OVERFLOW_CHECK
-#define RT_DEBUG_INIT 0
-#define RT_DEBUG_THREAD 0
 #define RT_USING_HOOK
+#define RT_IDEL_HOOK_LIST_SIZE 4
 #define IDLE_THREAD_STACK_SIZE 256
+#define RT_DEBUG
 
 /* Inter-Thread communication */
 
@@ -61,6 +60,7 @@
 #define FINSH_CMD_SIZE 80
 #define FINSH_USING_MSH
 #define FINSH_USING_MSH_DEFAULT
+#define FINSH_ARG_MAX 10
 
 /* Device virtual file system */
 
@@ -86,8 +86,14 @@
 /* Device Drivers */
 
 #define RT_USING_DEVICE_IPC
+#define RT_PIPE_BUFSZ 512
 #define RT_USING_PIN
 #define RT_USING_RTC
+#define RT_USING_SPI
+#define RT_USING_W25QXX
+
+/* Using WiFi */
+
 
 /* Using USB */
 
@@ -97,12 +103,18 @@
 #define RT_USING_LIBC
 #define RT_USING_POSIX
 
-/* Network stack */
+/* Network */
+
+/* Socket abstraction layer */
+
 
 /* light weight TCP/IP stack */
 
 
 /* Modbus master and slave stack */
+
+
+/* AT commands */
 
 
 /* VBUS(Virtual Software BUS) */
@@ -128,6 +140,9 @@
 /* Wiced WiFi */
 
 
+/* IoT Cloud */
+
+
 /* security packages */
 
 
@@ -142,8 +157,6 @@
 
 /* system packages */
 
-/* RT-Thread GUI Engine */
-
 
 /* peripheral libraries and drivers */
 
@@ -153,14 +166,10 @@
 
 /* sample package */
 
+/* samples: kernel and components samples */
+
 
 /* example package: hello */
-
-
-/* Privated Packages of RealThread */
-
-
-/* Network Utilities */
 
 #define SOC_STM32F2
 #define RT_USING_UART1

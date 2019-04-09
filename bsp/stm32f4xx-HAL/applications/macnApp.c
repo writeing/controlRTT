@@ -6,7 +6,7 @@
 #include "machOperation.h"
 #include "blueApp.h"
 
-rt_mq_t mach_rx_mq;
+static rt_mq_t mach_rx_mq;
 
 
 /********************
@@ -54,20 +54,27 @@ void app_macn_thread_entry(void *parameter)
 				if(ansyMacnData(mach_rx_buffer[i]) == ERROR)		//ansy macn status and speed
 				{
 					//mach is error
+					
 					//close mach 
+					setMacnStatus(ERROR);
 					//send mach run staut
-					//close mach send
+					//how to show data in face				
 				}
 			}
 		}		
-		//get caiji ban data is dircet and speed;
-		getGatcherInfo(&direct,&speed);
 		//check mach status 
 		if(checkMacnStatus() == SUCCESS)
 		{
+			//get caiji ban data is dircet and speed;
+			getGatcherInfo(&direct,&speed);
 			//send data to device mach
 			g_stuMachOpt.write(&g_stuMachInfo,direct,speed);
-		}		
+		}	
+		else
+		{
+			//send stop data to device mach
+			g_stuMachOpt.write(&g_stuMachInfo,0,0);
+		}
 		//if mach had false  ,set deviceStatus is DEVICE_END
 		rt_thread_delay(50);
 	}

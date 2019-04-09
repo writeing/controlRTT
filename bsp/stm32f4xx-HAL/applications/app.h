@@ -4,31 +4,55 @@
 
 
 //**********begin sys define 
-#define NUM1_Pin GPIO_PIN_8
-#define NUM1_GPIO_Port GPIOE
-#define NUM2_Pin GPIO_PIN_9
-#define NUM2_GPIO_Port GPIOE
-#define NUM3_Pin GPIO_PIN_10
-#define NUM3_GPIO_Port GPIOE
+#define BUZZ     	95
+
+#define RADREV	 	96
+
+#define URG_LOCK 	5
+
+#define BLE_PWRC 	52
+
+#define BLE_AT 	 	51
+
+#define BLE_CON	 	53
+
+#define DEVICE_KEY 	39
+
+#define KEY_1	 	0
+
+#define KEY_2	 	1
+
+#define KEY_3    	2
 
 
-#define KEY_1_Pin GPIO_PIN_0
-#define KEY_1_GPIO_Port GPIOC
-#define KEY_2_Pin GPIO_PIN_1
-#define KEY_2_GPIO_Port GPIOC
-#define KEY_3_Pin GPIO_PIN_2
-#define KEY_3_GPIO_Port GPIOC
-#define KEY_4_Pin GPIO_PIN_3
-#define KEY_4_GPIO_Port GPIOC
+#define ADC_ML		23
+
+#define ADC_MR		24
+
+#define PWM_DAC1	63
+
+#define PWM_DAC2	64
+
+#define PWM_DAC3	65
+
+#define PWM_DAC4	66
+
+
+
+
 //**********end sys define 
 
 //************begin user define CONFIG
-#define DEVICE_NONE      0
-#define DEVICE_BEGIN     1
-#define DEVICE_END       2
+#define DEVICE_NONE      	0
+#define DEVICE_BEGIN     	1
+#define DEVICE_END       	2
 
-#define DEVICE_KEY			1
-#define MODE_KEY			2
+#define SHOW_SPEED_MODE   	1
+
+#define SHOW_XXXX_MODE    	2
+
+#define SHOW_YYYY_MODE    	3
+
 
 //define debug config
 #define DEVICE_RUN_BODY_DATA				HAL_OK
@@ -42,7 +66,7 @@
 //***********begin user define func
 extern void rt_app_application_init(void);
 extern void rt_led_num_application_init(void);
-extern void lightNumLed(int speed,int index);
+extern void lightNumLed(int data,int index,int mode);
 extern int getSetShowNum(int showNum);
 extern void initExternFlash(void);		//in main thread   init extern flash
 

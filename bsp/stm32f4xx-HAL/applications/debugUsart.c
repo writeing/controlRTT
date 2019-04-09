@@ -106,8 +106,7 @@ void debugAnsy(char ch)
 	if(ch == REV_DEVICE_ID && s_index == 0)
 	{
 		revStauts = 1;
-	}	
-	//rt_kprintf("rev = %d,%d,%x\r\n",s_index,revStauts,ch);
+	}
 	s_revBuff[s_index++] = ch;
 	if(revStauts == 1)
 	{

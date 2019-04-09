@@ -14,13 +14,15 @@
 #include <rtthread.h>
 #include <board.h>
 #include "app.h"
-#include "dac.h"
 #include "math.h"
 #include "stdlib.h"
 #include "string.h"
 #include "flash.h"
 #include "bluetooth.h"
 #include "blueApp.h"
+#include "HAL_adc.h"
+#include "HAL_pwm.h"
+
 #define FLASH_DATA_ADDRESS                  0x0801A000
 
 stuFlashData g_flashData;
@@ -62,14 +64,16 @@ void initFlash()
 }
 void initExternFlash(void)
 {
-	MX_DAC_Init();
+	MX_TIM3_Init();
+	MX_ADC1_Init();	
 	//init flash data
 	initFlash();
 }
 
 int main(void)
 { 
-	
+
+	uint32_t channel1,channel2;
     /* user app entry */
 //	rt_err_t result;
 
@@ -78,11 +82,20 @@ int main(void)
 	beginSendBlueCmd();
 	initBlueSet();		  //
 	beginRevBlueData(); 
-
+	
 	while(1)
 	{
-		rt_thread_delay(300);
-		
+		rt_thread_delay(50);
+		//foreach get adc data
+		AdcGetValue(&channel1,&channel2);
+		//exec adc value 
+		//send data to blue 		
 	}	
 //    return 0;
 }
+
+
+
+
+
+
