@@ -106,6 +106,12 @@
 
 
 /* AT commands */
+#define RT_USING_AT
+#define AT_USING_CLIENT
+#define AT_CLIENT_NUM_MAX 1
+#define AT_USING_SOCKET
+#define AT_USING_CLI
+#define AT_PRINT_RAW_CMD
 
 
 /* VBUS(Virtual Software BUS) */

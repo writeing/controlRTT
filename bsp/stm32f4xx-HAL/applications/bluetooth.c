@@ -7,36 +7,25 @@
 #include "stdio.h"
 #include "app.h"
 #include "ansyBlueData.h"
-static rt_device_t device; 
+#include "at.h"
+//blue send and rev obj
+
+
 stuBodyExecInfo getBlueMacnStatus()
 {
 	return gBodyExecInfo;
 }
 int _get_Blue_CON()
 {
-	return rt_pin_read(53);
+	return rt_pin_read(BLE_CON);
 }
 void _set_Blue_PWRC(int st)
 {
-	rt_pin_write(52,st);
+	rt_pin_write(BLE_PWRC,st);
 }
 void _set_Blue_At(int st)
 {
-	rt_pin_write(51,st);
-}
-
-void sendBuffer(uint8_t *buff)
-{	
-	rt_device_write(device,0,buff,strlen((char *)buff));
-	rt_kprintf("%s",buff);
-}
-void _sendCmdToBlue(uint8_t *buff,int len)
-{	
-	for(int i = 0 ; i < len ; i ++)
-	{
-		rt_kprintf(" %02x ",buff[i]);
-	}
-	rt_device_write(device,0,buff,len);
+	rt_pin_write(BLE_AT,st);
 }
 //send data to blue
 void blueCmdSend(int cmd)
@@ -52,55 +41,76 @@ void blueCmdSend(int cmd)
 	buff[i++] = 0x00;	//data
 	buff[i++] = 0x01;	//crc	
 	buff[i++] = 0xAA;	//title
-	_sendCmdToBlue((uint8_t *)buff,i);
+	sendDataToBle(buff,i);
+//	_sendCmdToBlue((uint8_t *)buff,i);
 }
+
+
+
+//if(_get_Blue_CON() == PIN_HIGH)
+//{
+//	_set_Blue_At(PIN_HIGH);
+//	return WXC_OK;
+//}
+typedef struct blueCmdList
+{
+	char buff[20];
+	char flag;
+	char linenum;
+	char timeOutS;
+	char *parm;
+}stuBleCmdList;
+
+static stuBleCmdList g_blecmdList[] = 
+{
+	{"AT+KBYTE3",	RESP_STATUS_KEEP,	0,	1,	RT_NULL},
+	{"AT+HOSTEN1",	RESP_STATUS_KEEP,	0,	1,	RT_NULL},
+	{"AT+SCAN1",	RESP_STATUS_KEEP,	0,	1,	RT_NULL},
+	{"AT+RSLV",		RESP_STATUS_KEEP,	0,	1,	RT_NULL},
+	{"AT+BAND",		RESP_STATUS_DELETE,	0,	30,	g_flashData.blueDevice},
+	{"AT+CONNET",	RESP_STATUS_DELETE,	0,	30,	g_flashData.blueDevice},	
+};
+
 int initBlueSet(void)
 {
-	sendBuffer((uint8_t *)"AT+KBYTE3");
-	rt_thread_delay(1000);
-	if(_get_Blue_CON() == PIN_HIGH)
-	{
-		// had connect
-		//rt_kprintf("had connect %d\r\n",_get_Blue_CON());
-		//sendBuffer((uint8_t *)"hello world\r\n");
-		_set_Blue_At(PIN_HIGH);
-		return WXC_OK;
-	}
-	sendBuffer((uint8_t *)"AT+HOSTEN1");
-	rt_thread_delay(1000);
-	sendBuffer((uint8_t *)"AT+SCAN1");
-	rt_thread_delay(3000);
-	if(_get_Blue_CON() == PIN_HIGH)
-	{
-		//rt_kprintf("had connect\r\n");
-		return WXC_OK;
-	}
-	sendBuffer((uint8_t *)"AT+RSLV");
-	rt_thread_delay(1000);	
-	uint32_t time = rt_tick_get();
 	char buff[100] = {0};
-	sprintf(buff,"AT+BAND%s\0",g_flashData.blueDevice);//ef_get_env("blueCcid")
-	sendBuffer((uint8_t *)buff);
-	rt_thread_delay(1000);
-	memset(buff,0,100);
-	sprintf(buff,"AT+CONNET%s\0",g_flashData.blueDevice);//ef_get_env("blueCcid")
-	sendBuffer((uint8_t *)buff);
-	rt_thread_delay(1000);
-	time = rt_tick_get();
+	for(int i = 0 ; i < ARRAY_SIZE(g_blecmdList) ; i ++)
+	{
+		if(_get_Blue_CON() == PIN_HIGH)
+			return RT_EOK;
+		
+		if(g_blecmdList[i].flag == RESP_STATUS_DELETE)
+		{
+			setBlueRevParm(g_blecmdList[i].linenum ,g_blecmdList[i].timeOutS * 1000);			
+		}
+		if(g_blecmdList[i].parm != RT_NULL)
+		{
+		
+			memset(buff,0,100);
+			sprintf(buff,"%s%s\0",g_blecmdList[i].buff,g_blecmdList[i].parm);//ef_get_env("blueCcid")
+			sendBlueCmdData(g_blecmdList[i].buff,g_blecmdList[i].flag);		
+		}
+		else
+		{
+			sendBlueCmdData(g_blecmdList[i].buff,g_blecmdList[i].flag);			
+		}
+		
+	}
+	rt_uint32_t time = rt_tick_get();
 	while(_get_Blue_CON() != PIN_HIGH && rt_tick_get() - time < 30000)
 	{
 		rt_thread_delay(500);
-		//rt_kprintf("wait connet\r\n");
 	}
+	setBlueRevParm(0,1000);
 	if(_get_Blue_CON() != PIN_HIGH)
 	{
-		sendBuffer((uint8_t *)"AT+RSLV");
+		sendBlueCmdData("AT+RSLV",RESP_STATUS_KEEP);	
 		rt_thread_delay(1000);
 		return WXC_ERROR;
 	}
 	else
 	{		
-		//rt_kprintf("had connect\r\n");
+		rt_kprintf("had connect\r\n");
 		return WXC_OK;
 	}
 }
@@ -113,41 +123,102 @@ int getBlueConnectStatus()
 	else
 		return 0;
 }
+/***************blue rev and send func******************/
 
-void initBlue(rt_device_t dev)
+
+at_response_t arp;
+
+void initBlue(char* devName)
 {
-	device = dev;
+//		device = dev;	
+	at_client_init(devName, 512);
 }
-
-void blueBuffWrite(char *buff,int len)
+int setBlueRevParm(int line_num,int delayTimeMs)
 {
-	rt_device_write(device,0,buff,len);
-}
-void blueBuffRead(char *buff,int *len)
-{
-	*len = rt_device_read(device, 0, buff,12);
-}
-
-
-
-
-static void _ansyBlueCmdData(char * revbuff,int len)
-{
-	rt_kprintf("%s",revbuff);
-}
-void input_blueTooth_cmd(char ch)
-{
-	static char s_buff[64] = {0};
-	static int s_index=0;
-	s_buff[s_index++] = ch;
-	if(ch == 0xAA)
+	arp = at_create_resp(512,line_num,rt_tick_from_millisecond(delayTimeMs));
+	if(!arp)
 	{
-		//had end rev data
-		s_buff[s_index] = '\0';
-		_ansyBlueCmdData(s_buff,s_index);
-		memset(s_buff,0,s_index);
-		s_index = 0;		
+		LOG_E("No memory for response structure!");
+        return -RT_ENOMEM;
+	}	
+	return RT_EOK;
+}
+int sendBlueCmdData(char *cmd,int resp_mode)
+{		
+	if (at_exec_cmd(arp, cmd) != RT_EOK)
+    {
+        LOG_E("AT client send commands failed, response error or timeout !");
+        return -RT_ERROR;
+    }
+    if(resp_mode == RESP_STATUS_DELETE)
+	{
+		at_delete_resp(arp);	 
+	}
+	return RT_EOK;
+}
+int getRevDataForKey(char *key,char *revBuff)
+{
+	const char *rev;
+	rev = at_resp_get_line_by_kw(arp,key);
+	if(!rev)
+	{
+		LOG_E("AT client rev commands failed, response error or timeout !");
+        return -RT_ERROR;
+	}
+	rt_memcpy(revBuff, rev, rt_strlen(rev));
+	return RT_EOK;
+}
+int getRevDataForLine(int line,char *revBuff)
+{
+	const char *rev;
+	rev = at_resp_get_line(arp,line);
+	if(!rev)
+	{
+		LOG_E("AT client rev commands failed, response error or timeout !");
+        return -RT_ERROR;
+	}
+	rt_memcpy(revBuff, rev, rt_strlen(rev));
+	return RT_EOK;
+}
+void ansyBlueDatafunc(const char *data, rt_size_t size)
+{
+	LOG_D("AT Client receive ansy data!");
+	for(int i = 0 ; i < size; i ++)
+	{
+		input_blueTooth(data[i]);
 	}
 }
+void urc_recv_func(const char *data, rt_size_t size)
+{
+	 LOG_D("AT Client receive AT Server data!");
+}
+
+
+static struct at_urc urc_table[] = 
+{
+    {"+RECV",            ":",          urc_recv_func},
+  //  {{0xFF,0xFF},		  {0xAA,0xAA},     ansyBlueDatafunc},
+};
+
+int initBlueUrc(void)
+{
+	at_set_urc_table(urc_table,ARRAY_SIZE(urc_table));
+	return RT_EOK;
+}
+
+int sendDataToBle(char *buff,int len)
+{
+	return at_client_send(buff,len);
+}
+//
+//void blueBuffWrite(char *buff,int len)
+//{
+//	rt_device_write(device,0,buff,len);
+//}
+//void blueBuffRead(char *buff,int *len)
+//{
+//	*len = rt_device_read(device, 0, buff,*len);
+//}
+/****************************************************/
 
 

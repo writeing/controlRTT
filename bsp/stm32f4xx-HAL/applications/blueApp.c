@@ -18,33 +18,34 @@ rt_mq_t rx_mq;
 
 void getBlueCmdData(void)
 {
-	rt_err_t result;
-	int readLen = 1;
-	struct rx_msg msg;
-	char blueRevBuff[50];
-	if(blue_data_type == BLUE_CMD_MODE)
-	{
-		//cmd
-		//rt_kprintf("blue cmd mode;");
-		result = rt_mq_recv(blue_rx_mq, &msg, sizeof(struct rx_msg),50);
-		if(result == RT_EOK)
-		{
-			//rt_kprintf("blue had rev cmd data;%d",msg.size);
-			rt_thread_delay(50);
-			rt_tick_t starttime = rt_tick_get();
-			do
-			{
-				g_stublueOpt.read(blueRevBuff,&readLen);
-				for(int i = 0 ; i < readLen ; i ++)
-				{
-					input_blueTooth_cmd(blueRevBuff[i]);
-				}
-				memset(blueRevBuff,0,50);
-				rt_thread_delay(1);
-			}while(readLen == 0);
-			input_blueTooth_cmd(0xAA);
-		}
-	}//rev  blue data      
+//	rt_err_t result;
+//	int readLen = 1;
+//	struct rx_msg msg;
+//	char blueRevBuff[50];
+//	if(blue_data_type == BLUE_CMD_MODE)
+//	{
+//		//cmd
+//		//rt_kprintf("blue cmd mode;");
+//		result = rt_mq_recv(blue_rx_mq, &msg, sizeof(struct rx_msg),50);
+//		if(result == RT_EOK)
+//		{
+//			//rt_kprintf("blue had rev cmd data;%d",msg.size);
+//			rt_thread_delay(50);
+//			rt_tick_t starttime = rt_tick_get();
+//			do
+//			{
+//				readLen = msg.size;
+//				g_stublueOpt.read(blueRevBuff,&readLen);
+//				for(int i = 0 ; i < readLen ; i ++)
+//				{
+//					input_blueTooth_cmd(blueRevBuff[i]);
+//				}
+//				memset(blueRevBuff,0,50);
+//				rt_thread_delay(1);
+//			}while(readLen == 0);
+//			input_blueTooth_cmd(0xAA);
+//		}
+//	}//rev  blue data      
 }
 static rt_err_t blue_uart_input(rt_device_t dev, rt_size_t size)
 {
@@ -91,63 +92,63 @@ int getBlueMode(void)
 void app_thread_entry(void *parameter)
 {
 	//init usart blueTooth
-	int rx_length = 0;
-	struct rx_msg msg;
-	rt_device_t device;
-	rt_err_t result = RT_EOK;
-	device= rt_device_find("uart3");// blue
-	if (device != RT_NULL)
-	{		
-			rt_device_set_rx_indicate(device, blue_uart_input);
-			rt_device_open(device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);  //
-			rt_kprintf("usart3 init true\r\n");
-	}
-	else
-	{
-		rt_kprintf("usart3 init false\r\n");
-	}
+//	int rx_length = 0;
+//	struct rx_msg msg;
+//	rt_device_t device;
+//	rt_err_t result = RT_EOK;
+//	device= rt_device_find("uart3");// blue
+//	if (device != RT_NULL)
+//	{		
+//			rt_device_set_rx_indicate(device, blue_uart_input);
+//			rt_device_open(device, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);  //
+//			rt_kprintf("usart3 init true\r\n");
+//	}
+//	else
+//	{
+//		rt_kprintf("usart3 init false\r\n");
+//	}
 
-
-	initBlue(device);
+	initBlueSet();
 	while(1)
 	{
-		if(getBlueMode() == BLUE_DATA_MODE)
-		{
-			//rev blue data
-			result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg),10);  		
-			if(result != RT_EOK)
-			{
-				rt_thread_delay(3);
-				continue;
-			}		
-			//read blue data
-			g_stublueOpt.read((char *)uart_rx_buffer,&rx_length);
-			//ansy blue data
-			for(int i = 0 ; i < rx_length ; i ++ )
-			{					
-				input_blueTooth(uart_rx_buffer[i]);
-				if(uart_rx_buffer[i] == 0xcc)
-				{
-					setMacbWorkStatus(getBlueMacnStatus());
-				}
-			}
+//		if(getBlueMode() == BLUE_DATA_MODE)
+//		{
+//			//rev blue data
+//			result = rt_mq_recv(rx_mq, &msg, sizeof(struct rx_msg),10);  		
+//			if(result != RT_EOK)
+//			{
+//				rt_thread_delay(3);
+//				continue;
+//			}		
+//			//read blue data
+//			rx_length = 12;
+//			g_stublueOpt.read((char *)uart_rx_buffer,&rx_length);
+//			//ansy blue data
+//			for(int i = 0 ; i < rx_length ; i ++ )
+//			{					
+//				input_blueTooth(uart_rx_buffer[i]);
+//				if(uart_rx_buffer[i] == 0xcc)
+//				{
+//					setMacbWorkStatus(getBlueMacnStatus());
+//				}
+//			}
 			rt_thread_delay(3);		
-		}
-		else
-		{
-			getBlueCmdData();
-		}
+//		}
 	}
 }
 
 void rt_BlueApp_application_init()
 {
-	rt_thread_t tid;
+	
 	//defien mq to rev usart data
 	rx_mq = rt_mq_create("mq1",200,100,RT_IPC_FLAG_FIFO);
 	// define mq to rev blue data
 	blue_rx_mq = rt_mq_create("blue_mql",200,100,RT_IPC_FLAG_FIFO);
+	//init ble 
+	initBlue("uart3");
+	initBlueUrc();
 	
+	rt_thread_t tid;
 	tid = rt_thread_create("app", app_thread_entry, RT_NULL,
                            RT_APP_THREAD_STACK_SIZE, RT_APP_THREAD_PRIORITY, 20);
     RT_ASSERT(tid != RT_NULL);

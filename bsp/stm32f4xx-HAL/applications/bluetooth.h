@@ -2,6 +2,14 @@
 #define __BLUETOOTH__
 #include "app.h"
 #include <board.h>
+
+
+
+
+#define ARRAY_SIZE(ar) (sizeof(ar) / sizeof(ar[0]))
+
+
+
 #define NONE			0
 #define BLUE_HEAD		0x55
 #define BLUE_FUNCODE	0x03
@@ -38,18 +46,33 @@ typedef struct bodyexecInfo
 }stuBodyExecInfo;
 
 
-extern void 			input_blueTooth(unsigned char ch);
+//extern void 			input_blueTooth(unsigned char ch);
 extern stuBodyExecInfo 	getBlueMacnStatus(void);
-extern int 				initBlueSet(void);
-extern void 			input_blueTooth_cmd(char ch);
-extern void 			blueCmdSend(int cmd);
+//extern int 				initBlueSet(void);
+//extern void 			input_blueTooth_cmd(char ch);
+//extern void 			blueCmdSend(int cmd);
 extern short 			getClacData(short tData);
-extern int 				getBlueConnectStatus(void);
+//extern int 				getBlueConnectStatus(void);
 
 //new
-extern void 			initBlue(rt_device_t dev);
+
+#define RESP_STATUS_DELETE		1			
+#define RESP_STATUS_KEEP		0
 
 
+extern void 			initBlue(char* devName);
+extern int 				initBlueUrc(void);
+
+extern int 				setBlueRevParm(int line_num,int delayTimeMs);
+
+extern int 				sendBlueCmdData(char *cmd,int resp_mode);
+extern int 				getRevDataForKey(char *key,char *revBuff);
+extern int 				getRevDataForLine(int line,char *revBuff);
+
+extern int 				sendDataToBle(char *buff,int len);
+
+
+extern int 				initBlueSet(void);
 
 extern stuFlashData g_flashData;
 extern stuBodyExecInfo gBodyExecInfo;
