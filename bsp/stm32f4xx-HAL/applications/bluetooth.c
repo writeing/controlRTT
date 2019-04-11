@@ -58,12 +58,12 @@ typedef struct blueCmdList
 
 static stuBleCmdList g_blecmdList[] = 
 {
-	//{"AT+KBYTE3",	RESP_STATUS_KEEP,	0,	1,	RT_NULL},
-	{"AT+HOSTEN1",RESP_STATUS_KEEP,	2,	3,	RT_NULL},
-	{"AT+SCAN1",	RESP_STATUS_KEEP,	0,	1,	RT_NULL},
-	{"AT+RSLV",		RESP_STATUS_KEEP,	0,	1,	RT_NULL},
-	{"AT+BAND",		RESP_STATUS_DELETE,	0,	30,	g_flashData.blueDevice},
-	{"AT+CONNET",	RESP_STATUS_DELETE,	0,	30,	g_flashData.blueDevice},	
+	{"AT+KBYTE3",	RESP_STATUS_KEEP,	2,	1,	RT_NULL},
+	{"AT+HOSTEN1",	RESP_STATUS_KEEP,	2,	3,	RT_NULL},
+	{"AT+SCAN1",	RESP_STATUS_KEEP,	2,	1,	RT_NULL},
+	{"AT+RSLV",		RESP_STATUS_KEEP,	2,	1,	RT_NULL},
+	{"AT+BAND",		RESP_STATUS_DELETE,	3,	30,	g_flashData.blueDevice},
+	{"AT+CONNET",	RESP_STATUS_DELETE,	2,	30,	g_flashData.blueDevice},	
 };
 
 int initBlueSet(void)
@@ -83,7 +83,7 @@ int initBlueSet(void)
 		if(g_blecmdList[i].parm != RT_NULL)
 		{		
 			memset(buff,0,100);
-			sprintf(buff,"%s%s\0",g_blecmdList[i].buff,g_blecmdList[i].parm);//ef_get_env("blueCcid")
+			sprintf(buff,"%s%s",g_blecmdList[i].buff,g_blecmdList[i].parm);//ef_get_env("blueCcid")
 			sendBlueCmdData(g_blecmdList[i].buff,g_blecmdList[i].flag);		
 		}
 		else
@@ -91,9 +91,9 @@ int initBlueSet(void)
 			sendBlueCmdData(g_blecmdList[i].buff,g_blecmdList[i].flag);	
 		}
 		//get return line
-		//at_resp_parse_line_args(arp,1,"%s",buff);
+		at_resp_parse_line_args(arp,1,"%s",buff);
 		//getRevDataForKey("OK",buff);
-		//rt_kprintf("%s",buff);
+		rt_kprintf("%s",buff);
 	}
 	rt_uint32_t time = rt_tick_get();
 	while(_get_Blue_CON() != PIN_HIGH && rt_tick_get() - time < 30000)
