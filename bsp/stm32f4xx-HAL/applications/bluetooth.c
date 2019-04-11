@@ -8,9 +8,11 @@
 #include "app.h"
 #include "ansyBlueData.h"
 #include "at.h"
+#include "blueOperation.h"
 //blue send and rev obj
+static rt_device_t device;
 
-
+static at_response_t arp = RT_NULL;
 stuBodyExecInfo getBlueMacnStatus()
 {
 	return gBodyExecInfo;
@@ -45,13 +47,6 @@ void blueCmdSend(int cmd)
 //	_sendCmdToBlue((uint8_t *)buff,i);
 }
 
-
-
-//if(_get_Blue_CON() == PIN_HIGH)
-//{
-//	_set_Blue_At(PIN_HIGH);
-//	return WXC_OK;
-//}
 typedef struct blueCmdList
 {
 	char buff[20];
@@ -63,8 +58,8 @@ typedef struct blueCmdList
 
 static stuBleCmdList g_blecmdList[] = 
 {
-	{"AT+KBYTE3",	RESP_STATUS_KEEP,	0,	1,	RT_NULL},
-	{"AT+HOSTEN1",	RESP_STATUS_KEEP,	0,	1,	RT_NULL},
+	//{"AT+KBYTE3",	RESP_STATUS_KEEP,	0,	1,	RT_NULL},
+	{"AT+HOSTEN1",RESP_STATUS_KEEP,	2,	3,	RT_NULL},
 	{"AT+SCAN1",	RESP_STATUS_KEEP,	0,	1,	RT_NULL},
 	{"AT+RSLV",		RESP_STATUS_KEEP,	0,	1,	RT_NULL},
 	{"AT+BAND",		RESP_STATUS_DELETE,	0,	30,	g_flashData.blueDevice},
@@ -76,25 +71,29 @@ int initBlueSet(void)
 	char buff[100] = {0};
 	for(int i = 0 ; i < ARRAY_SIZE(g_blecmdList) ; i ++)
 	{
+		//check ble has connect
 		if(_get_Blue_CON() == PIN_HIGH)
 			return RT_EOK;
-		
-		if(g_blecmdList[i].flag == RESP_STATUS_DELETE)
+		//check resp is del
+		if(!arp)
 		{
 			setBlueRevParm(g_blecmdList[i].linenum ,g_blecmdList[i].timeOutS * 1000);			
 		}
+		//check pram is NULL
 		if(g_blecmdList[i].parm != RT_NULL)
-		{
-		
+		{		
 			memset(buff,0,100);
 			sprintf(buff,"%s%s\0",g_blecmdList[i].buff,g_blecmdList[i].parm);//ef_get_env("blueCcid")
 			sendBlueCmdData(g_blecmdList[i].buff,g_blecmdList[i].flag);		
 		}
 		else
 		{
-			sendBlueCmdData(g_blecmdList[i].buff,g_blecmdList[i].flag);			
+			sendBlueCmdData(g_blecmdList[i].buff,g_blecmdList[i].flag);	
 		}
-		
+		//get return line
+		//at_resp_parse_line_args(arp,1,"%s",buff);
+		//getRevDataForKey("OK",buff);
+		//rt_kprintf("%s",buff);
 	}
 	rt_uint32_t time = rt_tick_get();
 	while(_get_Blue_CON() != PIN_HIGH && rt_tick_get() - time < 30000)
@@ -126,12 +125,14 @@ int getBlueConnectStatus()
 /***************blue rev and send func******************/
 
 
-at_response_t arp;
 
 void initBlue(char* devName)
 {
-//		device = dev;	
-	at_client_init(devName, 512);
+	_set_Blue_At(PIN_LOW);
+	if(at_client_init(devName, 512) == RT_EOK)
+	{
+		LOG_E("init success\r\n");
+	}
 }
 int setBlueRevParm(int line_num,int delayTimeMs)
 {
@@ -146,16 +147,17 @@ int setBlueRevParm(int line_num,int delayTimeMs)
 int sendBlueCmdData(char *cmd,int resp_mode)
 {		
 	if (at_exec_cmd(arp, cmd) != RT_EOK)
-    {
-        LOG_E("AT client send commands failed, response error or timeout !");
-        return -RT_ERROR;
-    }
-    if(resp_mode == RESP_STATUS_DELETE)
+	{
+		LOG_E("AT client send commands failed, response error or timeout !");
+		return -RT_ERROR;
+	}
+	if(resp_mode == RESP_STATUS_DELETE)
 	{
 		at_delete_resp(arp);	 
 	}
 	return RT_EOK;
 }
+
 int getRevDataForKey(char *key,char *revBuff)
 {
 	const char *rev;
@@ -168,6 +170,9 @@ int getRevDataForKey(char *key,char *revBuff)
 	rt_memcpy(revBuff, rev, rt_strlen(rev));
 	return RT_EOK;
 }
+
+
+
 int getRevDataForLine(int line,char *revBuff)
 {
 	const char *rev;
@@ -190,19 +195,20 @@ void ansyBlueDatafunc(const char *data, rt_size_t size)
 }
 void urc_recv_func(const char *data, rt_size_t size)
 {
-	 LOG_D("AT Client receive AT Server data!");
+	 LOG_E("AT Client receive AT Server data!");
 }
 
 
 static struct at_urc urc_table[] = 
 {
-    {"+RECV",            ":",          urc_recv_func},
+    {"+",            "R",          urc_recv_func},
   //  {{0xFF,0xFF},		  {0xAA,0xAA},     ansyBlueDatafunc},
 };
 
 int initBlueUrc(void)
 {
 	at_set_urc_table(urc_table,ARRAY_SIZE(urc_table));
+	//at_set_end_sign('R');
 	return RT_EOK;
 }
 
@@ -211,14 +217,23 @@ int sendDataToBle(char *buff,int len)
 	return at_client_send(buff,len);
 }
 //
-//void blueBuffWrite(char *buff,int len)
-//{
-//	rt_device_write(device,0,buff,len);
-//}
-//void blueBuffRead(char *buff,int *len)
-//{
-//	*len = rt_device_read(device, 0, buff,*len);
-//}
+void initOldBle(rt_device_t bledevice)
+{
+	device = bledevice;
+	_set_Blue_At(PIN_LOW);
+}
+void setBle(void)
+{
+	g_stublueOpt.write("AT+HOSTEN1",10);
+}
+void blueBuffWrite(char *buff,int len)
+{
+	rt_device_write(device,0,buff,len);
+}
+void blueBuffRead(char *buff,int *len)
+{
+	*len = rt_device_read(device, 0, buff,*len);
+}
 /****************************************************/
 
 

@@ -46,6 +46,11 @@ typedef struct bodyexecInfo
 }stuBodyExecInfo;
 
 
+void initOldBle(rt_device_t bledevice);
+void setBle(void);
+void blueBuffWrite(char *buff,int len);
+void blueBuffRead(char *buff,int *len);
+
 //extern void 			input_blueTooth(unsigned char ch);
 extern stuBodyExecInfo 	getBlueMacnStatus(void);
 //extern int 				initBlueSet(void);

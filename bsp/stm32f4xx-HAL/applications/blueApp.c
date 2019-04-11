@@ -18,34 +18,30 @@ rt_mq_t rx_mq;
 
 void getBlueCmdData(void)
 {
-//	rt_err_t result;
-//	int readLen = 1;
-//	struct rx_msg msg;
-//	char blueRevBuff[50];
-//	if(blue_data_type == BLUE_CMD_MODE)
-//	{
-//		//cmd
-//		//rt_kprintf("blue cmd mode;");
-//		result = rt_mq_recv(blue_rx_mq, &msg, sizeof(struct rx_msg),50);
-//		if(result == RT_EOK)
-//		{
-//			//rt_kprintf("blue had rev cmd data;%d",msg.size);
-//			rt_thread_delay(50);
-//			rt_tick_t starttime = rt_tick_get();
-//			do
-//			{
-//				readLen = msg.size;
-//				g_stublueOpt.read(blueRevBuff,&readLen);
-//				for(int i = 0 ; i < readLen ; i ++)
-//				{
-//					input_blueTooth_cmd(blueRevBuff[i]);
-//				}
-//				memset(blueRevBuff,0,50);
-//				rt_thread_delay(1);
-//			}while(readLen == 0);
-//			input_blueTooth_cmd(0xAA);
-//		}
-//	}//rev  blue data      
+	rt_err_t result;
+	int readLen = 1;
+	struct rx_msg msg;
+	char blueRevBuff[50];
+	if(blue_data_type == BLUE_CMD_MODE)
+	{
+		//cmd
+		//rt_kprintf("blue cmd mode;");
+		result = rt_mq_recv(blue_rx_mq, &msg, sizeof(struct rx_msg),50);
+		if(result == RT_EOK)
+		{
+			//rt_kprintf("blue had rev cmd data;%d",msg.size);
+			rt_thread_delay(50);
+			rt_tick_t starttime = rt_tick_get();
+			do
+			{
+				readLen = msg.size;
+				g_stublueOpt.read(blueRevBuff,&readLen);
+				rt_kprintf("%s",blueRevBuff);
+				rt_memset(blueRevBuff,0,50);
+				rt_thread_delay(1);
+			}while(readLen == 0);
+		}
+	}//rev  blue data      
 }
 static rt_err_t blue_uart_input(rt_device_t dev, rt_size_t size)
 {
@@ -107,10 +103,12 @@ void app_thread_entry(void *parameter)
 //	{
 //		rt_kprintf("usart3 init false\r\n");
 //	}
-
+//	initOldBle(device);
 	initBlueSet();
+	//setBle();
 	while(1)
 	{
+		getBlueCmdData();
 //		if(getBlueMode() == BLUE_DATA_MODE)
 //		{
 //			//rev blue data

@@ -79,9 +79,9 @@ int main(void)
 
 	//后面放到总的初始化地方，在这个线程启动之后的地方	
 	rt_thread_delay(300);
-	beginSendBlueCmd();
-	initBlueSet();		  //
-	beginRevBlueData(); 
+//	beginSendBlueCmd();
+//	initBlueSet();		  //
+//	beginRevBlueData(); 
 	
 	while(1)
 	{
