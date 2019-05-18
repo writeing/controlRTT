@@ -72,7 +72,7 @@ extern void initExternFlash(void);		//in main thread   init extern flash
 
 extern void rt_MacnApp_application_init(void);
 extern void rt_BlueApp_application_init(void);
-extern void getBlueCmdData(void);
+extern int getBlueCmdData(void);
 //***********end user define func
 
 //***********begin user define value

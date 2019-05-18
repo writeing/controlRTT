@@ -58,6 +58,8 @@ extern stuBodyExecInfo 	getBlueMacnStatus(void);
 //extern void 			blueCmdSend(int cmd);
 extern short 			getClacData(short tData);
 //extern int 				getBlueConnectStatus(void);
+extern void 			blueBuffWrite(char *buff,int len);
+extern int 				setBlueInit(void);
 
 //new
 
@@ -65,16 +67,7 @@ extern short 			getClacData(short tData);
 #define RESP_STATUS_KEEP		0
 
 
-extern void 			initBlue(char* devName);
-extern int 				initBlueUrc(void);
 
-extern int 				setBlueRevParm(int line_num,int delayTimeMs);
-
-extern int 				sendBlueCmdData(char *cmd,int resp_mode);
-extern int 				getRevDataForKey(char *key,char *revBuff);
-extern int 				getRevDataForLine(int line,char *revBuff);
-
-extern int 				sendDataToBle(char *buff,int len);
 
 
 extern int 				initBlueSet(void);

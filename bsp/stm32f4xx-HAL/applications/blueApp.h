@@ -11,7 +11,7 @@
 extern void 		getGatcherInfo(int *direct,int *speed);
 extern void 		beginSendBlueCmd(void);
 extern void 		beginRevBlueData(void);
-
+extern int 			getBlueMode(void);
 
 
 

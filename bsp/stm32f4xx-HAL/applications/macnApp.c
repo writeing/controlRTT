@@ -20,7 +20,7 @@ rt_err_t macn_uart_input(rt_device_t dev, rt_size_t size)
     struct rx_msg bluemsg;
     bluemsg.dev = dev;
     bluemsg.size = size;	
-	rt_mq_send(mach_rx_mq, &bluemsg, sizeof(struct rx_msg));  	
+		rt_mq_send(mach_rx_mq, &bluemsg, sizeof(struct rx_msg));  	
     return RT_EOK;
 }
 //macn send data to mach
